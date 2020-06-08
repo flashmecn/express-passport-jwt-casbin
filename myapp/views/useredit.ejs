@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户修改</title>
+    <%include header.ejs%>
+    <style>
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="forms">
+            <div class="formsTitle">
+                <h2>填写用户信息</h2>
+            </div>
+            <form action="javascript:void(0)" id="form1">
+                <input name="id" type="hidden">
+                <dl>
+                    <dt>用户名</dt>
+                    <dd><input name="name" type="text" /></dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt>密码</dt>
+                    <dd><input name="password" type="text" /></dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt>角色</dt>
+                    <dd>
+                        <select name="role">
+                            <option value="">请选择角色</option>
+                            <% for(var i=0;i<rows.length;i++){ %>
+                            <option value="<%=rows[i].name%>"><%=rows[i].name%></option>
+                            <% } %>
+                        </select>
+                    </dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt></dt>
+                    <dd><button onclick="upData()">确定</button></dd>
+                </dl>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+
+        var page = parent.layer.getFrameIndex(window.name);//获取此窗体名
+
+        var posturl,msgstr;
+        if (location.hash == "#edit") {
+            posturl="/users/edit";
+            msgstr="修改成功";
+            $("select[name=role]").val(parent.editdata.role);
+            $('input[name=id]').val(parent.editdata.id);
+            $('h2').text(parent.editdata.name);
+            $('input[name=name]').attr('placeholder',parent.editdata.name);
+        }else if (location.hash == "#add"){
+            posturl="/users/add";
+            msgstr="添加成功";
+        }
+
+
+        function upData() {
+            $.ajax({
+                type: "POST",
+                url: posturl,
+                data: postObj($('#form1').serializeArray()),
+                dataType: 'json',
+                headers: {
+                    Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+                },
+                success: function (result) {
+                    if (result.state) {
+                        parent.layer.msg(msgstr);
+                        parent.layer.close(page);
+                        parent.getlist && parent.getlist();
+                    } else {
+                        parent.layer.msg(result.msg);
+                    }
+
+                },
+                error: function (err) {
+                    if (err.status == 403) {
+                        parent.layer.msg('您无权限操作！');
+                    }
+                }
+            });
+            return;
+        }
+
+
+    </script>
+</body>
+
+</html>

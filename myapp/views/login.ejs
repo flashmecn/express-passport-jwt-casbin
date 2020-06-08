@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <%include header.ejs%>
+    <style>
+        .loginbtn h2{cursor: pointer;}
+        .loginbtn h2:not(.active) {
+            color: purple;
+            background-color: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="forms">
+            <div class="formsTitle loginbtn">
+                <h2 class="label active">登陆</h2>
+                <h2 class="label">注册</h2>
+            </div>
+        </div>
+        <div class="logincon">
+            <div class="forms">
+                <form action="javascript:void(0)" id="form1">
+                    <dl>
+                        <dt>登陆名</dt>
+                        <dd><input name="name" ng-bind="name" type="text" placeholder="用户名 邮箱" /></dd>
+                    </dl>
+                    <hr>
+                    <dl>
+                        <dt>密码</dt>
+                        <dd><input name="password" type="password" /></dd>
+                    </dl>
+                    <hr>
+                    <dl>
+                        <dt></dt>
+                        <dd><button onclick="login()">登录</button></dd>
+                    </dl>
+                </form>
+            </div>
+            <div class="forms">
+                <form action="javascript:void(0)" id="form2">
+                    <dl>
+                        <dt>用户名</dt>
+                        <dd><input name="name" ng-bind="name" type="text" /></dd>
+                    </dl>
+                    <hr>
+                    <dl>
+                        <dt>邮箱</dt>
+                        <dd><input name="email" type="text" /></dd>
+                    </dl>
+                    <hr>
+                    <dl>
+                        <dt>密码</dt>
+                        <dd><input name="password" type="password" /></dd>
+                    </dl>
+                    <br>
+                    <dl>
+                        <dt>重复密码</dt>
+                        <dd><input name="password2" type="password" /></dd>
+                    </dl>
+                    <hr>
+                    <dl>
+                        <dt></dt>
+                        <dd><button onclick="register()">注册</button></dd>
+                    </dl>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        tabbox('.loginbtn', '.logincon', 'click');
+
+        var myData={name:""}
+        var watch = new watchdata();
+        watch.inputevent(); //绑定input变化
+        watch.setwatch(myData);
+
+        //登录
+        function login() {
+            $.ajax({
+                type: "POST",
+                url: "/login",
+                data: postObj($('#form1').serializeArray()),
+                dataType: 'json',
+                success: function (result) {
+                    console.log("login -> result", result)
+                    if (result.state) {
+                        window.localStorage.setItem('flashmeToken', result.token);
+                        window.location.href = "/users";
+                    } else {
+                        layer.alert(result.msg)
+                    }
+
+                }
+            });
+            return;
+        }
+
+        //注册
+        function register() {
+            $.ajax({
+                type: "POST",
+                url: "/login/register",
+                data: postObj($('#form2').serializeArray()),
+                dataType: 'json',
+                success: function (result) {
+                    console.log("register -> result", result)
+                    if (result.state) {
+                        layer.msg("注册成功");
+                        $('.loginbtn h2:eq(0)').trigger("click");
+                    } else {
+                        layer.alert(result.msg)
+                    }
+
+                },
+                error: function (result) {
+                    if (result.status == 429) {
+                        alert("请求过于频繁！");
+                        return;
+                    }
+                    console.log("请求失败", result);
+                }
+            });
+            return;
+        }
+
+
+        //测试
+        var pagemsg = "<%= msg %>";
+        if (pagemsg) {
+            alert(pagemsg);
+        }
+
+    </script>
+</body>
+
+</html>

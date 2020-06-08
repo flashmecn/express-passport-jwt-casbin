@@ -1,0 +1,7 @@
+p, root, /users/*, *
+p, high, /users/list, GET
+p, high, /users/add, POST
+p, high, /users/edit, POST
+p, medium, /users/list, GET
+p, medium, /users/add, POST
+p, low, /users/list, GET

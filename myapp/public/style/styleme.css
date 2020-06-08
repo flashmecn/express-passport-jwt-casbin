@@ -1,0 +1,356 @@
+﻿@charset "UTF-8";
+
+/**
+ +------------------------------------------------------------------------------
+ * 网站常用样式兼容重置 | 夕空
+ +------------------------------------------------------------------------------
+ * www.flashme.cn
+ * flashme@live.cn
+ * 2019-11-19
+ +------------------------------------------------------------------------------
+*/
+body, select, input, textarea {
+    color: #333333;
+}
+html{height:100%;}
+body{
+	font-family:"微软雅黑"; line-height:22px; font-size:13px;
+    background:#FFF;
+    width:100%;height:100%; margin:0; padding:0;
+}
+
+a{outline:none; text-decoration:none; color:#333;}
+a:hover{ text-decoration:none; color:#0035BF;}
+
+body,div,dl,dt,dd,ul,ol,li,pre,code,form,input,textarea,p,th,td,blockquote{margin:0;padding:0;} table{border-collapse:collapse;border-spacing:0;}
+p{/* text-indent:2em;*/}
+img{border:0;} address,caption,cite,code,dfn,em,th,var{font-style:normal;font-weight:normal;}
+li{list-style:none;}
+caption,th{text-align:left;} h1,h2,h3,h4,h5,h6{/*font-size:100%;*/font-weight:normal;}
+hr{border:none; clear:both; height:0; background:none; margin:0; padding:0; border-bottom:#eee solid 1px;  margin:10px 0;}
+
+/*首字母*/
+.firstletter:first-letter{ font-size:200%;}
+
+.clear{ clear:both;font-size:0px;height:0px; line-height:0px; overflow:hidden;}/* 清除浮动*/
+.colwrapper { overflow:hidden; zoom:1; /*for ie*/ margin:5px auto; }/* 高度自适应 */ 
+.strong{ font-weight: bold;} .left{ float: left;} .right{ float: right;} .center{ margin:0 auto; text-align:center;}
+.show{ display:block; visibility:visible;}.hide{ display: none !important; /*visibility:hidden;*/}
+.block{ display:block;} .inline{ display:inline;} .relative{ position: relative; }
+.transparent{filter:alpha(opacity=80); -moz-opacity:0.8;/** Firefox 3.5支持opacity属性，只在Firefox3以下版本有效 ***/ -khtml-opacity: 0.8; opacity: 0.8; }
+.break{ word-wrap:break-word;overflow:hidden; word-break:break-all;}/*允许长单词换行*/
+
+code, pre { border-radius: 3px; color: #333333; font-family: Menlo,Monaco,"Courier New",monospace; font-size: 12px; padding: 0 3px 2px; }
+
+pre{ font-family:consolas,"Courier New",courier,monospace; /*color:#0088CC;*/ background-color: #F7F7F9; border: 1px solid #E1E1E8; border-radius: 4px 4px 4px 4px; display: block; font-size: 12.025px; line-height: 18px; margin: 0 0 9px; padding: 8.5px; white-space: pre-wrap; word-break: break-all; word-wrap: break-word;}
+
+code { background-color: #F7F7F9; border: 1px solid #E1E1E8; color: #0088CC; padding: 2px 4px; }
+pre ol{
+	margin: 0 0 0 14px;
+}
+pre.unstyled{
+	background:none; color:#333; border:none;
+}
+
+/*插入flash默认灰色*/
+/*object{ background:gray; display:block;}*/
+
+.pink{ color:#ff00ff;} .blue{ color:#0078FF;} .deepblue{ color:#000099;} .gray{ color:#999999;} .red{ color:#ff0000;} .black{ color:#000;} .white{ color:white;} .green{color:green;} .orange{color: #FF6200} .yellow{color: yellow;}
+
+
+/* 固定不动 */
+.fixed{
+	position:fixed;
+	width:100%;height:100%;
+	z-index:-10;
+	/*left:50%;margin-left:-45%;居中，百分之百宽度去掉这行即可*/
+	/*IE6属性，固定位置*/
+	_position:absolute;
+	_bottom:auto;
+	_top:expression(eval(document.documentElement.scrollTop));
+}
+*html{ background-image:url(about:blank); background-attachment:fixed; /* 解决固定层在IE6下闪的问题 */}
+
+
+/* png透明 */
+.pngfix{filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src='images/x.png');}
+
+/* 渐变 */
+.gradient{filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartcolorStr=#ffffff, EndcolorStr=#dedede);background: -moz-linear-gradient(top, #ffffff, #dedede);}
+
+.radius{
+	-webkit-border-radius: 4px;   /*只支持webkit内核的浏览器*/
+	border-radius: 4px;  /*只支持IE内核的浏览器（IE>=7)*/
+	-moz-border-radius : 4px; /*只支持Mozilla内核的浏览器*/
+	border:#ddd solid 1px;
+	padding:4px;
+}
+
+/*超出省略号显示*/
+.ellipsis{
+	white-space:nowrap;/*设置不折行*/
+	text-overflow:ellipsis;/*这就是省略号喽*/
+	-o-text-overflow:ellipsis;/*兼容opera*/
+	overflow:hidden;
+}
+
+/* 解决ie下连接加粗的鼠标样式问题*/
+a strong{ cursor:pointer;}
+
+/**
+ +------------------------------------------------------------------------------
+ * 兼容解决方案
+ +------------------------------------------------------------------------------
+*/
+em{ font-style:italic;} strike{ text-decoration:line-through !important;} b,strong{ font-weight:bold !important;} u{ text-decoration:underline !important;}
+
+/**
+ +------------------------------------------------------------------------------
+ * 表单样式
+ +------------------------------------------------------------------------------
+*/
+input{}/*Only for ie 5.0+*/
+input:hover{}/*For orther browsers*/
+form{}
+
+input[type=text],input[type=password],textarea{
+	outline: medium none; padding: 4px 6px;
+}
+fieldset{
+	padding:20px; border:#ccc solid 1px;
+}
+button,html input[type="button"],input[type="reset"],input[type="submit"] {
+	margin:0 4px; padding:6px 8px; overflow:visible; -webkit-appearance: button; cursor: pointer;
+}
+select{ padding:4px 6px; margin:0;}
+select option{ padding:2px 0;}
+
+button,select {
+  text-transform: none;
+}
+button[disabled],html input[disabled] {
+  cursor: default;
+}
+button::-moz-focus-inner,input::-moz-focus-inner {
+  border: 0; padding: 0;
+}
+input {
+  line-height: normal;
+}
+input[type="checkbox"],input[type="radio"] {
+  box-sizing: border-box; padding: 0;
+}
+
+
+/**
+ +------------------------------------------------------------------------------
+ * 文章内容区CSS
+ +------------------------------------------------------------------------------
+*/
+.endText { width: 90%;margin:10px auto 0; overflow: hidden; text-align: justify; text-justify: inter-ideograph; clear: both; font-size: 13px; line-height: 24px; padding-bottom: 20px; word-wrap: break-word; } 
+.endText h2 { font-size: 14px; }
+.endText p { font-size: 13px; margin: 18px 0; }
+@media screen and (min-width: 1400px) {
+ .endText { font-size: 15px; line-height: 1.7;}
+ .endText h2 { font-size: 20px;}
+ .endText p { font-size: 15px;}
+}
+.endText a { text-decoration: underline; }
+.endText a, .endText a:visited { color: #0f6b99; }
+.endText a:hover, .endText a:active { color: #cc1b1b; }
+/* cms */
+.endText table td p {text-indent:0;font-size:12px;margin:0;}
+.endText table th p {text-indent:0;font-size:12px;margin:0;}
+.endText table td img {border: none; margin:5px}
+
+/**
+ +------------------------------------------------------------------------------
+ * forms类表单自排序功能
+ +------------------------------------------------------------------------------
+*/
+
+.forms{*word-spacing:-1px;font-size: 0; text-align: left;}
+.forms div,.forms span{font-size: 14px;}
+.forms dl{
+	height:auto !important;height:30px;min-height:30px; margin:7px 8px; padding:0; /*white-space:nowrap;*/
+	/*inline-block 兼容解决方案*/
+	display: inline-block; *display: inline; *zoom:1; vertical-align: top;
+	font-size: 0; word-spacing:normal; letter-spacing: normal;
+}
+.forms dl dt{
+    min-width:90px;*width:expression((this.offsetWidth < 90) ? (this.width = 90 +'px') : true);
+    height:auto !important;height:30px;min-height:30px; line-height:30px; white-space:nowrap;
+    margin:0;padding:0 10px 0 10px; text-align:right;border-left:#D0ECBF 4px solid;
+    /*inline-block 兼容解决方案*/
+	display: inline-block; *display: inline; *zoom:1; vertical-align: top;
+	font-size: 15px; word-spacing:normal; letter-spacing: normal;
+}
+.forms dl dd{
+	height:auto !important;height:30px;min-height:30px; line-height:30px;
+	padding:0; margin:0; color:#555; white-space:normal;
+	/*inline-block 兼容解决方案*/
+	display: inline-block; *display: inline; *zoom:1; vertical-align: top;
+	font-size: 15px; word-spacing:normal; letter-spacing: normal;
+}
+.forms dl i{font-style:normal;}
+.forms dl.table{display: table;}
+.forms dl.table dt,.forms dl.table dd{display: table-cell;}
+
+.formsTitle{
+	width:100%; height:36px; margin:16px auto 10px;border-bottom: #B0B0B0 2px solid;box-shadow: 6px -10px 10px rgba(0,0,0,0.1) inset;
+	/*inline-block 兼容解决方案*/
+	display: inline-block; *display: inline; *zoom:1; vertical-align: top;
+	font-size: 16px; word-spacing:normal; letter-spacing: normal;
+}
+.formsTitle h2{ float:left; display:inline; padding:0 16px;margin: 0;text-align: center; border-radius:4px 4px 0 0; background:#1F2932; color:#FFF; font-size:16px; line-height:36px;min-width:80px; height:36px;}
+.forms hr{ width:100%; height:0; font-size:0; line-height:0; overflow:hidden; margin:12px 0; padding:0;*margin-top:-7px; border-bottom:#eee solid 1px;}
+.forms .hr{ width:100%; height:0; font-size:0; line-height:0; overflow:hidden; margin:12px 0; padding:0; border-bottom:#eee solid 1px;}
+
+
+.forms fieldset{
+	margin:5px auto;padding:20px; border:#CBCBCB solid 1px;border-radius:12px;
+	/*inline-block 兼容解决方案*/
+	display: inline-block; *display: inline; *zoom:1; vertical-align: top;
+	font-size: 15px; word-spacing:normal; letter-spacing: normal;
+}
+.forms legend{
+	padding:0 20px; border-radius:6px; background:#54B5DE; color:#FFF; font-size:15px; font-weight:bold; line-height:30px;min-width:80px; height:30px;
+}
+
+.forms label{ margin:0 8px; line-height:30px; white-space:nowrap; vertical-align: middle;}
+.forms input[type=radio],.forms input[type=checkbox]{ margin:0 0 0 6px; padding:0; vertical-align: middle;}
+
+.forms input[type=text],.forms input[type=password]{
+	height: 28px; line-height: 28px; padding: 0 9px; margin: 5px; vertical-align: middle;
+	border: 1px solid #D0D8DE; box-shadow: 0 1px 1px #D0D8DE inset;
+}
+.forms textarea{
+	line-height: 26px; padding: 0 9px; margin: 5px; vertical-align: top;
+	border: 1px solid #D0D8DE; box-shadow: 0 1px 1px #D0D8DE inset;
+}
+.forms select{
+	height: 28px; line-height: 28px; padding: 0 9px; margin: 5px; vertical-align: middle;
+	border: 1px solid #D0D8DE;
+}
+.forms dd input[type=text],.forms dd input[type=password],.forms dd select,.forms dd textarea{
+	margin: 0 10px 0 0;
+}
+
+.forms input[type=submit],.forms input[type=button],.forms input[type=reset]{
+	padding: 8px 16px; margin:0 4px; border: none; background: #1D7BBE; color: #FFF; font-size: 15px; vertical-align: middle;
+}
+.forms dl.br{clear: both;}
+
+
+/**
+ +------------------------------------------------------------------------------
+ * table定义数据表格样式（默认有斑马条纹）
+ +------------------------------------------------------------------------------
+*/
+
+.data_table {
+	margin: 0; width: 100%; height: 100%; overflow: auto; position: relative; font-size: 14px;
+}
+.data_table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.data_table caption {
+    height: 30px;
+    line-height: 30px;
+    font-weight: 700;
+}
+.data_table thead th,
+.data_table tbody td {
+    padding:8px;
+    height: 22px;
+    line-height: 22px;
+    font-weight: 400;
+    /*非隔行变色时 用于行区分的单元格底线颜色 */
+    border-bottom: #E8E8E8 1px solid;
+}
+/* 表头配色 */
+.data_table thead th {
+    text-align: left;
+    color:#fff;
+    background-color: #1D7BBE;
+}
+/* 隔行变色 行默认颜色 */
+.data_table tbody tr {
+	background-color: #fefefe;
+	color: #686868;
+}
+/* 隔行变色 偶数行配色 */
+.data_table tbody tr:nth-child(even) {
+	background-color: #f2f2f2;
+	/*background-color: rgba(243, 242, 255, 0.20);*/
+}
+.data_table tbody tr:hover,.data_table tbody tr:nth-child(even):hover {
+	background-color: #D2E6F6;
+}
+
+/* 复选框的列宽 */
+.row-selected {
+    width: 15px;
+}
+.data_table .head{
+	position: absolute;left: 0;top: 0; width: 100%; overflow: hidden;
+}
+
+
+/**************************************************布局**************************************************/
+/*兼容垂直居中*/
+.wrapmiddle {
+    display: table; width: 100%;height: 100%;overflow: hidden;*position: relative;
+}
+.wrapmiddle .wrapsub {display: table-cell;vertical-align: middle;*position: absolute;*top: 50%;}
+.wrapmiddle .wrapsub .wrapbox {*position: relative;*top: -50%;}
+
+/*图片固定*/
+.imgfixed{background-attachment: fixed;background-position: center;}
+/*图片撑满居中*/
+.imgcover{background-position: center;background-size:cover;background-repeat:no-repeat;}
+.objcover{width: 100%;height: 100%;object-fit: cover;}
+/*图片适应居中*/
+.imgcontain{background-position: center;background-size:contain;background-repeat:no-repeat;}
+.objcontain{width: 100%;height: 100%;object-fit: contain;}
+
+.inblock{font-size: 0 !important;text-align: center;}
+.inblock >*{
+    /*inline-block 兼容解决方案*/
+    display: inline-block; *display: inline; *zoom:1; vertical-align: middle;
+    font-size: 13px; word-spacing:normal; letter-spacing: normal; line-height: 1.6;
+}
+
+/*栅格布局*/
+.justify{font-size: 0 !important;text-align:justify !important;text-justify:inter-ideograph !important;}
+.justify.last{text-align-last:justify;}
+.colbox,[class*=col-]{text-align: left;}
+.justify.last >li,.justify.last >.colbox,.justify.last >[class*=col-]{text-align-last: left;}
+[class*=col-]{float: left;box-sizing: border-box;padding: 10px;*padding:10px 0;margin: 0;height: auto;overflow: hidden;}
+.justify >li,.colbox,.justify >[class*=col-]{
+	box-sizing: border-box;float: none;
+	/*inline-block 兼容解决方案*/
+	display: inline-block; *display: inline; *zoom:1; vertical-align: top;
+	font-size: 13px; word-spacing:normal; letter-spacing: normal; line-height: 1.6;
+}
+.col-1{width: 8.3333%;} .col-01{width: 10%;}
+.col-2{width: 16.6666%;} .col-02{width: 20%;}
+.col-3{width: 25%;} .col-03{width: 30%;}
+.col-4{width: 33.3333%;} .col-04{width: 40%;}
+.col-5{width: 41.6666%;} .col-05{width: 50%;}
+.col-6{width: 50%;} .col-06{width: 60%;}
+.col-7{width: 58.3333%;} .col-07{width: 70%;}
+.col-8{width: 66.6666%;} .col-08{width: 80%;}
+.col-9{width: 75%;} .col-09{width: 90%;}
+.col-10{width: 83.3333%;}
+.col-11{width: 91.6666%;}
+.col-12{width: 100%;}
+
+
+.container, .wrapper{
+	width: 90%; min-width: 990px; *width:990px; margin:0 auto; clear:both; height:auto;
+}
+@media only screen and (max-width: 990px){
+	.container,.wrapper{min-width: 640px;}
+}

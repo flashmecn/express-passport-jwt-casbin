@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理</title>
+    <%include header.ejs%>
+    <style>
+        .user{background-color: #f2f2f2;margin: 0 auto;padding: 20px;}
+        .user h1{display: inline-block;color: brown;}
+    </style>
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <div class="user">
+            当前用户：<h1><a href="/login">未登录</a></h1> <button>退出</button><h3></h3>
+        </div>
+        <div class="forms">
+            <form action="javascript:void(0)" id="form1">
+                <div class="data_table">
+                    <table>
+                        <thead>
+                            <tr><th>用户名</th><th>角色</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="table_foot">
+                    <div class="right">
+                        <button id="preBtn" class="btn size-14 bg-blue"> < </button>&nbsp;&nbsp;<b ng-bind="page" style="color: yellow"></b> /<span ng-bind="total"></span>&nbsp;&nbsp;<button id="nextBtn" class="btn size-14 bg-blue"> > </button>
+                        总条数：<span ng-bind="length"></span>&nbsp;&nbsp;&nbsp;&nbsp;前往：<input id="gotopage" type="text" style="width: 30px" />
+                    </div>
+                    <button class="del-list btn size-14 bg-ju">批量删除</button><button class="add-btn btn size-14 bg-blue">新增</button>
+                </div>
+            </form>
+        </div>
+        <p>my web: <a href="http://www.flashme.cn" target="_blank">www.flashme.cn</a></p>
+    </div>
+
+
+
+    <script id="table-art" type="text/html">
+		{{each}}
+        <tr>
+            <td class="name"><input name="id" type="checkbox" value="{{$value.id}}"> {{$value.name}}</td>
+            <td class="role">{{$value.role}}</td>
+            <td>{{$value.email}}</td>
+            <td>{{$value.time}}</td>
+            <td><a href="javascript:void(0)" onclick="editbtn(this)">修改</a></td>
+        </tr>
+		{{/each}}
+	</script>
+
+
+    <script>
+
+        var nowPage=1;
+        var myData = { page: 0,total:0,length:0 }
+        var watch = new watchdata();
+        watch.setwatch(myData);
+
+        //获取用户个人数据
+        $.ajax({
+            type: "POST",
+            url: "/users",
+            headers: {
+                Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+            },
+            success: function (result) {
+                if (result.state) {
+                    $('.user h1').text(result.user.name);
+                    $('.user h3').text("邮箱：" + result.user.email);
+                } else {
+                    layer.confirm(result.msg, {
+                        btn: ['去登录', '知道了'],
+                        title: false, //不显示标题
+                        shadeClose: true, //开启遮罩关闭
+                        closeBtn: 0, //隐藏关闭按钮
+                        // time: 2000, //2秒后自动关闭
+                    }, function () {
+                        window.location.href = "/login";
+                    });
+                }
+            }
+        })
+
+        //读取用户数据
+        function getlist(page,size) {
+            size=size||10;
+            $.ajax({
+                type: "GET",
+                url: "/users/list",
+                data:{size:size,page:page||1},
+                headers: {
+                    Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+                },
+                success: function (result) {
+                    console.log(result);
+                    myData.page=page||1;//页数
+                    myData.length=result.length;//总条数
+                    myData.total=Math.ceil(result.length/size);//总页数
+                    $('#form1 tbody').html("");
+                    if (result.state && result.data.length>0) {
+                        $('#form1 tbody').html(template('table-art', result.data));
+                    }
+                },
+                error: function (err) {
+                    if (err.status == 403) {
+                        parent.layer.msg('您无权限浏览！请联系管理员！');
+                    }
+                }
+            });
+        }
+        getlist();
+
+        //上一页
+        $('#preBtn').click(function () {
+            if(nowPage>1){
+                nowPage--;
+                getlist(nowPage);
+            }
+        })
+        //下一页
+        $('#nextBtn').click(function () {
+            if(nowPage<myData.total){
+                nowPage++;
+                getlist(nowPage);
+            }
+        })
+        //跳转页码
+        $('#gotopage').keyup(function(event){
+            if(event.keyCode ==13){
+                var num=parseInt($(this).val());
+                if(num<1 || num>myData.total){
+                    return;
+                }
+                nowPage=num;
+                getlist(nowPage);
+            }
+        });
+
+        //退出登录(删除token)
+        $('.user button').click(function () {
+            window.localStorage.removeItem('flashmeToken');
+            window.location.href = "/login";
+        })
+
+        //新增用户
+        $('.add-btn').click(function () {
+            var layerindex=layer.open({
+                type: 2,
+                title: "新增用户：",
+                area: ['720px', '60%'],
+                fixed: false, //不固定
+                maxmin: true,
+                shadeClose: true,
+                content: '/users/edit#add'
+            });
+        })
+
+        //删除用户
+        $('.del-list').click(function () {
+            layer.confirm("确定要删除" + $('input[name=id]:checked').length + "名用户？", {
+                btn: ['删除', '不'],
+                title: false, //不显示标题
+                shadeClose: true, //开启遮罩关闭
+                closeBtn: 0, //隐藏关闭按钮
+                // time: 2000, //2秒后自动关闭
+            }, function () {
+                var list = $('input[name=id]:checked').map(function (index, el) {
+                    return $(this).val();
+                }).get().join(",");
+
+                $.ajax({
+                    type: "POST",
+                    url: "/users/del",
+                    data: { id: list },
+                    headers: {
+                        Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+                    },
+                    success: function (result) {
+                        layer.msg(result.msg)
+                        if(result.state){
+                            getlist();//更新列表
+                        }
+                    },
+                    error: function (err) {
+                        if(err.status==403){
+                            parent.layer.msg('您无权限操作！');
+                        }
+                    }
+                })
+            });
+
+        })
+        
+        var editdata={}
+        function editbtn(ev) {
+            var tr=$(ev).closest('tr')
+            editdata.id=tr.find('input[name=id]').val();
+            editdata.name=tr.find('.name').text();
+            editdata.role=tr.find('.role').text();
+            var layerindex=layer.open({
+                type: 2,
+                title: "修改用户："+editdata.name,
+                area: ['720px', '60%'],
+                fixed: false, //不固定
+                maxmin: true,
+                shadeClose: true,
+                content: '/users/edit#edit'
+            });
+            //可以执行iframe里的函数
+            // var iframe=document.getElementById("layui-layer-iframe"+layerindex)
+            // var content=iframe.contentWindow;
+            // iframe.onload=function(){
+            //     content.iframeFun();
+            // }
+            
+        }
+
+        var pagemsg = "<%= msg %>";
+        console.log("pagemsg", pagemsg)
+
+    </script>
+</body>
+
+</html>

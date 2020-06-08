@@ -1,6 +1,7 @@
 # node.js-express用户登录验证及权限演示平台
 
 > npm install
+
 > npm start
 
 支持用户名及邮箱登录；支持RBAC角色权限；支持注册及登录次数限制

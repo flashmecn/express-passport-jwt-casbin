@@ -4,6 +4,8 @@
 
 > npm start
 
+http://localhost:3000/
+
 支持用户名及邮箱登录；支持RBAC角色权限；支持注册及登录次数限制
 
 初始管理员：admin 密码：111111
@@ -30,5 +32,7 @@ Express的基础使用 > ejs后端渲染框架（也可选用其它的） > pass
 权限模块的权限配置文件在 data/authz_policy.csv
 
 权限模块文档：
+
 [casbin.org/docs/zh-CN/overview(官网较慢)](http://casbin.org/docs/zh-CN/overview "casbin.org/docs/zh-CN/overview(官网较慢)")
+
 [www.kancloud.cn/oldlei/casbin(不全)](http://www.kancloud.cn/oldlei/casbin "www.kancloud.cn/oldlei/casbin(不全)")

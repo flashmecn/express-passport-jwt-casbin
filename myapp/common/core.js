@@ -2,9 +2,15 @@
 exports.key = "www.flashme.cn.20200607";//用于密码加密加盐
 exports.datapath = "./data/flashme-data.db";
 
+//邮件SMTP服务
+exports.email = {
+  service: 'smtp.qq.com',
+  user: '168387321@qq.com',
+  pass: ''
+}
 
 //检查用户名合法性
-exports.confirmName=function(value) {
+exports.confirmName = function (value) {
   var reg = /^([\u4E00-\uFA29]|[\uE7C7-\uE7F3]|[a-zA-Z0-9_-]){3,12}$/;
   var reg2 = /^(_|-|[0-9])/;
   if (!reg.test(value)) {
@@ -17,7 +23,7 @@ exports.confirmName=function(value) {
 
 }
 //检查邮箱合法性
-exports.confirmEmail=function(value) {
+exports.confirmEmail = function (value) {
   var reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
   if (!reg.test(value)) {
     return "邮箱格式不正确!";
@@ -25,6 +31,18 @@ exports.confirmEmail=function(value) {
     return false;
   }
 
+}
+
+//随机字符串
+exports.randomString = function (len) {
+  len = len || 8;
+  var $chars = 'ABCDEFGHJKLMNPQRSTWXYZabcdefhijkmnprstwxyz123456789';
+  var maxPos = $chars.length;
+  var pwd = '';
+  for (i = 0; i < len; i++) {
+    pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+  }
+  return pwd;
 }
 
 

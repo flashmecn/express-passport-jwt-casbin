@@ -9,8 +9,8 @@
 <body>
   <div class="wrapper">
     <div class="endText">
-      <h1><%= title %></h1>
-      <p>支持用户名及邮箱登录；支持RBAC角色权限；支持注册及登录次数限制</p>
+      <h1><%= title %> v1.1</h1>
+      <p>支持用户名及邮箱登录；支持RBAC角色权限；支持注册及登录次数限制；支持邮件验证找回密码功能</p>
       <a href="/login">前去登录</a><br>初始管理员：admin 密码：111111
       <h2>涉及技术</h2>
       <p>后端框架：Express</p>
@@ -20,6 +20,7 @@
       <p>访问次数限制：express-rate-limit</p>
       <p>权限验证：casbin + casbin-express-authz</p>
       <p>数据库：sqlite3</p>
+      <p>密码找回：nodemailer + express-session</p>
       <p>以上模块均可npm下载，使用方法可自行查阅</p>
       <h2>学习曲线：</h2>
       <p><a href="https://www.expressjs.com.cn/" target="_blank">Express</a>的基础使用 > ejs后端渲染框架（也可选用其它的） > passport-jwt登录验证 > 访问限制express-rate-limit > sqlite3数据库api > RBAC角色权限（这个最难 只是基础使用的话需要自己制作后台的API权限设置）</p>

@@ -6,7 +6,7 @@
 
 http://localhost:3000/
 
-支持用户名及邮箱登录；支持RBAC角色权限；支持注册及登录次数限制
+支持用户名及邮箱登录；支持RBAC角色权限；支持注册及登录次数限制；支持邮件验证找回密码功能
 
 初始管理员：admin 密码：111111
 ## 涉及技术
@@ -23,6 +23,8 @@ http://localhost:3000/
 权限验证：casbin + casbin-express-authz
 
 数据库：sqlite3
+
+密码找回：nodemailer + express-session
 
 > 以上模块均可npm下载，使用方法可自行查阅
 

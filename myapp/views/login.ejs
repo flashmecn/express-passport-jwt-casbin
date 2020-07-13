@@ -12,6 +12,8 @@
             color: purple;
             background-color: transparent;
         }
+
+        #repass,#newpass{display: none;}
     </style>
 </head>
 
@@ -38,7 +40,7 @@
                     <hr>
                     <dl>
                         <dt></dt>
-                        <dd><button onclick="login()">登录</button></dd>
+                        <dd><button onclick="login()">登录</button><a href="javascript:repassbtn()">找回密码</a></dd>
                     </dl>
                 </form>
             </div>
@@ -71,6 +73,25 @@
                 </form>
             </div>
         </div>
+
+        <div class="forms" id="repass">
+            <div class="formsTitle">
+                <h2 class="label">密码找回</h2>
+            </div>
+            <form action="javascript:void(0)">
+                <dl>
+                    <dt>账户邮箱</dt>
+                    <dd><input name="email" type="text" /><button onclick="repass()" id="verifybtn">获取验证码 <b ng-bind="verifytime"></b></button></dd>
+                </dl>
+                <hr>
+                <dl id="newpass">
+                    <dt>新密码：</dt>
+                    <dd><input name="password" type="password" placeholder="新密码" /></dd>
+                    <dd><input name="verify" type="text" placeholder="验证码" style="width: 100px;" /></dd>
+                    <dd><button onclick="repassword()">修改</button></dd>
+                </dl>
+            </form>
+        </div>
     </div>
 
 
@@ -78,7 +99,7 @@
 
         tabbox('.loginbtn', '.logincon', 'click');
 
-        var myData={name:""}
+        var myData={name:"",verifytime:60}
         var watch = new watchdata();
         watch.inputevent(); //绑定input变化
         watch.setwatch(myData);
@@ -132,6 +153,67 @@
             return;
         }
 
+
+        //找回密码
+        var verifynum;
+        function repassbtn(){
+            $('#repass').show();
+        }
+        function repass(){
+            $('#verifybtn').attr('disabled','disabled');
+            $('#verifybtn b').show();
+            myData.verifytime=60;
+            $.ajax({
+                type: "POST",
+                url: "/login/repass",
+                data: postObj($('#repass form').serializeArray()),
+                dataType: 'json',
+                success: function (result) {
+                    layer.msg(result.msg);
+                    if(result.state){
+                        $('#newpass').show();
+                        clearInterval(verifynum);
+                        verifynum=setInterval(function(){
+                            if(myData.verifytime>0){
+                                myData.verifytime--;
+                            }else{
+                                $('#verifybtn').removeAttr('disabled');
+                                $('#verifybtn b').hide();
+                            }
+                        },1000)
+                    }
+                },
+                error: function (result) {
+                    if (result.status == 429) {
+                        layer.msg("操作过于频繁！");
+                        return;
+                    }
+                }
+            });
+            return;
+        }
+        function repassword() {
+
+            $.ajax({
+                type: "POST",
+                url: "/login/repassword",
+                data: postObj($('#repass form').serializeArray()),
+                dataType: 'json',
+                success: function (result) {
+                    layer.alert(result.msg);
+                    if(result.state){
+                        $('#repass').hide();
+                    }
+                },
+                error: function (result) {
+                    if (result.status == 429) {
+                        layer.msg(result);
+                        return;
+                    }
+                }
+            });
+            return;
+        }
 
         //测试
         var pagemsg = "<%= msg %>";

@@ -1,7 +1,12 @@
-p, root, /users/*, *
-p, high, /users/list, GET
-p, high, /users/add, POST
-p, high, /users/edit, POST
-p, medium, /users/list, GET
-p, medium, /users/add, POST
-p, low, /users/list, GET
+p, SS, *, *
+p, user, /users/*, *
+p, notdel, /users/list*, GET
+p, notdel, /users/add, POST
+p, notdel, /users/edit, POST
+p, onlyadd, /users/list*, GET
+p, onlyadd, /users/add, POST
+p, guest, /users/list*, GET
+g, root, user
+g, high, notdel
+g, medium, onlyadd
+g, low, guest

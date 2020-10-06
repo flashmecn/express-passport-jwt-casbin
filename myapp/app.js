@@ -31,9 +31,11 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/error', require('./routes/error'));
 app.use('/users', usersRouter);
 app.use('/login', require('./routes/login'));
-app.use('/error', require('./routes/error'));
+app.use('/api', require('./routes/api'));
+app.use('/role', require('./routes/role'));
 
 
 

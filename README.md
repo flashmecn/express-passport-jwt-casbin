@@ -6,7 +6,7 @@
 
 http://localhost:3000/
 
-支持用户名及邮箱登录；支持RBAC角色权限；支持注册及登录次数限制；支持邮件验证找回密码功能
+支持用户名及邮箱登录；支持RBAC角色权限及API权限和角色管理；支持注册及登录次数限制；支持邮件验证找回密码功能
 
 初始管理员：admin 密码：111111
 ## 涉及技术
@@ -38,3 +38,5 @@ Express的基础使用 > ejs后端渲染框架（也可选用其它的） > pass
 [casbin.org/docs/zh-CN/overview(官网较慢)](http://casbin.org/docs/zh-CN/overview "casbin.org/docs/zh-CN/overview(官网较慢)")
 
 [www.kancloud.cn/oldlei/casbin(不全)](http://www.kancloud.cn/oldlei/casbin "www.kancloud.cn/oldlei/casbin(不全)")
+
+前端仅使用了jquery.js/ 模板引擎art-template/ 弹窗layer.js （算是用较少引入实现更多前端功能）

@@ -1,6 +1,6 @@
 {
   "name": "myapp",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -8,7 +8,7 @@
   "dependencies": {
     "base64url": "^3.0.1",
     "body-parser": "^1.19.0",
-    "casbin": "^5.0.3",
+    "casbin": "^5.1.5",
     "casbin-express-authz": "^3.0.1",
     "cookie-parser": "~1.4.4",
     "crypto": "^1.0.1",

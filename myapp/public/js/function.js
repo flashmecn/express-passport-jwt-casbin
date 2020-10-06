@@ -227,22 +227,30 @@ function tabbox(tabtit,tab_conbox,mouseEvent) {
 };
 
 //将form表数据转Obj对象 postObj(form.serializeArray())
-function postObj(params){
-  var values = {};
-  for( x in params ){
-    values[params[x].name] = params[x].value;
-  }
-  return values;
+function postObj(params) {
+    var values = {};
+    for (x in params) {
+        if (!values[params[x].name]) {
+            values[params[x].name] = params[x].value;
+        }else if(values[params[x].name] instanceof Array==false){
+            values[params[x].name]=[values[params[x].name]];
+            values[params[x].name].push(params[x].value);
+        }else{
+            values[params[x].name].push(params[x].value);
+        }
+
+    }
+    return values;
 }
 
 
 
 // 对Date的扩展，将 Date 转化为指定格式的String
-// 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符， 
-// 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字) 
-// 例子： 
-// (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423 
-// (new Date()).Format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18 
+// 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
+// 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+// 例子：
+// (new Date()).Format("yyyy-MM-dd HH:mm:ss.S") ==> 2006-07-02 08:09:04.423
+// (new Date()).Format("yyyy-M-d H:m:s.S")      ==> 2006-7-2 8:9:4.18
 Date.prototype.Format = function (fmt) {
     var o = {
         "M+": this.getMonth() + 1, //月份 
@@ -257,4 +265,38 @@ Date.prototype.Format = function (fmt) {
     for (var k in o)
     if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
     return fmt;
+}
+
+//Table固定表头 class=heightY执行固定表头
+function tablehead($target) {
+    $target.each(function () {
+        //复制表格做置顶表头
+        var $this = $(this);
+        if($this.hasClass('heightY')){
+        	$this.find('.head').remove();
+        	var tablehead = $this.find('table').clone();
+        	tablehead.find('input,textarea,select').attr('name', '');
+        	tablehead.find('input,textarea,select').attr('id', '');
+        	tablehead.find('input.check').remove();
+        	$this.append('<div class="head"></div>');
+        	$this.find('.head').append(tablehead);
+        	$this.find('.head').height($this.find('.head thead').height());
+        	$this.scroll(function () {
+        		$this.find('.head').css('top', $this.scrollTop());
+        	})
+        }
+        
+        //全选按钮
+        $this.find('.check-all').click(function () {
+            $this.find('tbody input[type=checkbox].check').prop('checked', $(this).prop('checked'));
+        })
+        $this.on('click', 'input[type=checkbox].check', function(event) {
+            if($this.find('input[type=checkbox].check:checked').length==$this.find('input[type=checkbox].check').length){
+            	$this.find('.check-all').prop('checked',true);
+            }else{
+            	$this.find('.check-all').prop('checked',false);
+            }
+        });
+    })
+
 }

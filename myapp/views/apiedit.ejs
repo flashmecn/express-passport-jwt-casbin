@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据修改</title>
+    <%include header.ejs%>
+    <style>
+        h3{font-weight: bold;margin: 5px;}
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="forms">
+            <div class="formsTitle">
+                <h2>填写API信息</h2>
+            </div>
+            <form action="javascript:void(0)" id="form1">
+                <input name="id" type="hidden">
+                <input name="api" type="hidden">
+                <dl>
+                    <dt>API名称</dt>
+                    <dd><input name="name" type="text" style="width: 400px;" maxlength="20" /></dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt>API</dt>
+                    <dd><input name="route" type="text" style="width: 400px;" maxlength="30" /></dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt>权限配置</dt>
+                    <dd>
+                        <ul class="quan justify"></ul>
+                        <hr/>
+                        <input class="newrole" type="text" maxlength="12" />
+                        <button onclick="newRole()">新增角色</button>
+                    </dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt></dt>
+                    <dd>
+                        <button class="savebtn" onclick="upData()">提交</button>
+                        <button class="resetbtn" onclick=parent.layer.close(frame)>取消</button>
+                    </dd>
+                </dl>
+            </form>
+        </div>
+    </div>
+
+
+    <script id="table-art" type="text/html">
+		{{each}}
+        <li id="{{$value}}">
+            <h3>[ {{$value}} ]</h3>
+            <label>查<input name="{{$value}}" type="checkbox" class="get" value="GET"></label>
+            <label>增<input name="{{$value}}" type="checkbox" class="post" value="POST"></label>
+            <label>改<input name="{{$value}}" type="checkbox" class="put" value="PUT"></label>
+            <label>删<input name="{{$value}}" type="checkbox" class="delete" value="DELETE"></label>
+        </li>
+		{{/each}}
+    </script>
+
+
+    <script>
+
+        var frame = parent.layer.getFrameIndex(window.name);//获取此窗体名
+
+        var posturl, msgstr, ajaxtype;
+        if (location.hash == "#edit") {
+            ajaxtype = "put";
+            posturl = "/api/data";
+            msgstr = "修改成功";
+            $('input[name=id]').val(parent.editdata.id);
+            $('input[name=api]').val(parent.editdata.route);
+            $('h2').text(parent.editdata.route);
+            $('input[name=name]').attr('placeholder', parent.editdata.name);
+            $('input[name=route]').attr('placeholder', parent.editdata.route);
+        } else if (location.hash == "#add") {
+            ajaxtype = "post";
+            posturl = "/api/data";
+            msgstr = "添加成功";
+        }
+
+
+        function upData() {
+            $.ajax({
+                type: ajaxtype,
+                url: posturl,
+                data: $('#form1').serialize(),
+                dataType: 'json',
+                headers: {
+                    Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+                },
+                success: function (result) {
+                    if (result.state) {
+                        parent.layer.msg(result.msg||msgstr);
+                        parent.layer.close(frame);
+                        parent.listdata && parent.listdata.list();
+                    } else {
+                        parent.layer.msg(result.msg);
+                    }
+
+                },
+                error: function (err) {
+                    if (err.status == 403) {
+                        parent.layer.msg('您无权限操作！');
+                    }
+                }
+            });
+            return;
+        }
+
+
+        //======列出权限表
+
+        $.ajax({
+            type: "get",
+            url: "/api/p",
+            data: {route:parent.editdata.route},
+            dataType: 'json',
+            headers: {
+                Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+            },
+            success: function (result) {
+            console.log("result", result)
+                if (result.state) {
+                    $('.quan').html(template('table-art', result.roles));
+                    for (const k in result.policy) {
+                        const element = result.policy[k];
+                        if(element[2]=='*'){
+                            $('#'+element[0]).find('input').prop('checked',true);
+                        }else{
+                            $('#'+element[0]).find('.'+element[2].toLowerCase()).prop('checked',true);
+                        }
+                    }
+                } else {
+                    parent.layer.msg(result.msg);
+                }
+
+            },
+            error: function (err) {
+                if (err.status == 403) {
+                    parent.layer.msg('您无权限操作！');
+                }
+            }
+        });
+
+        //新增角色
+        function newRole() {
+            var str=$('.newrole').val().trim();
+            if(!str){
+                layer.msg("请填写角色名！");
+                return;
+            }
+            if(str == "id" || str == "name" || str == "api" || str == "route"){
+                layer.msg("禁用的角色名！");
+                return;
+            }
+            var newdata=[str];
+            $('.quan').append(template('table-art', newdata));
+        }
+
+        //配置全选交互
+        $('.quan').on('click','li h3',function () {
+            var target=$(this).closest('li');
+            if(target.find('input:checked').length==4){
+                target.find('input').prop('checked',false);
+            }else{
+                target.find('input').prop('checked',true);
+            }
+        })
+
+    </script>
+</body>
+
+</html>

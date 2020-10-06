@@ -14,9 +14,10 @@
 
 <body>
 
+    <%include menu.ejs%>
     <div class="wrapper">
         <div class="user">
-            当前用户：<h1><a href="/login">未登录</a></h1> <button>退出</button><h3></h3>
+            当前用户：<h1 class="username"><a href="/login">未登录</a></h1> <button>退出</button><h3>邮箱：<span class="useremail"></span></h3>
         </div>
         <div class="forms">
             <form action="javascript:void(0)" id="form1">
@@ -25,7 +26,7 @@
                         <thead>
                             <tr><th>用户名</th><th>角色</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody class="listdata"></tbody>
                     </table>
                 </div>
                 <div class="table_foot">
@@ -55,92 +56,14 @@
 	</script>
 
 
+    <script src="/js/getlist.js"></script>
     <script>
 
-        var nowPage=1;
-        var myData = { page: 0,total:0,length:0 }
-        var watch = new watchdata();
-        watch.setwatch(myData);
+        //获取列表数据
+        var listdata=new getlist("/users/data");
+        listdata.init();
+        listdata.list();
 
-        //获取用户个人数据
-        $.ajax({
-            type: "POST",
-            url: "/users",
-            headers: {
-                Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
-            },
-            success: function (result) {
-                if (result.state) {
-                    $('.user h1').text(result.user.name);
-                    $('.user h3').text("邮箱：" + result.user.email);
-                } else {
-                    layer.confirm(result.msg, {
-                        btn: ['去登录', '知道了'],
-                        title: false, //不显示标题
-                        shadeClose: true, //开启遮罩关闭
-                        closeBtn: 0, //隐藏关闭按钮
-                        // time: 2000, //2秒后自动关闭
-                    }, function () {
-                        window.location.href = "/login";
-                    });
-                }
-            }
-        })
-
-        //读取用户数据
-        function getlist(page,size) {
-            size=size||10;
-            $.ajax({
-                type: "GET",
-                url: "/users/list",
-                data:{size:size,page:page||1},
-                headers: {
-                    Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
-                },
-                success: function (result) {
-                    console.log(result);
-                    myData.page=page||1;//页数
-                    myData.length=result.length;//总条数
-                    myData.total=Math.ceil(result.length/size);//总页数
-                    $('#form1 tbody').html("");
-                    if (result.state && result.data.length>0) {
-                        $('#form1 tbody').html(template('table-art', result.data));
-                    }
-                },
-                error: function (err) {
-                    if (err.status == 403) {
-                        parent.layer.msg('您无权限浏览！请联系管理员！');
-                    }
-                }
-            });
-        }
-        getlist();
-
-        //上一页
-        $('#preBtn').click(function () {
-            if(nowPage>1){
-                nowPage--;
-                getlist(nowPage);
-            }
-        })
-        //下一页
-        $('#nextBtn').click(function () {
-            if(nowPage<myData.total){
-                nowPage++;
-                getlist(nowPage);
-            }
-        })
-        //跳转页码
-        $('#gotopage').keyup(function(event){
-            if(event.keyCode ==13){
-                var num=parseInt($(this).val());
-                if(num<1 || num>myData.total){
-                    return;
-                }
-                nowPage=num;
-                getlist(nowPage);
-            }
-        });
 
         //退出登录(删除token)
         $('.user button').click(function () {
@@ -175,8 +98,8 @@
                 }).get().join(",");
 
                 $.ajax({
-                    type: "POST",
-                    url: "/users/del",
+                    type: "delete",
+                    url: "/users/data",
                     data: { id: list },
                     headers: {
                         Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
@@ -184,7 +107,7 @@
                     success: function (result) {
                         layer.msg(result.msg)
                         if(result.state){
-                            getlist();//更新列表
+                            listdata.list();//更新列表
                         }
                     },
                     error: function (err) {
@@ -221,10 +144,9 @@
             
         }
 
-        var pagemsg = "<%= msg %>";
-        console.log("pagemsg", pagemsg)
 
     </script>
+    <script src="/js/login.js"></script>
 </body>
 
 </html>

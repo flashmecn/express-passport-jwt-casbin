@@ -11,7 +11,8 @@
     <div class="endText">
       <h1><%= title %> v1.1</h1>
       <p>支持用户名及邮箱登录；支持RBAC角色权限；支持注册及登录次数限制；支持邮件验证找回密码功能</p>
-      <a href="/login">前去登录</a><br>初始管理员：admin 密码：111111
+      <a href="/login">前去登录</a> | <a href="/users">用户管理</a> | <a href="/api">API权限</a> | <a href="/role">角色分配</a><br>
+      初始管理员：admin 密码：111111
       <h2>涉及技术</h2>
       <p>后端框架：Express</p>
       <p>后端渲染：ejs</p>
@@ -23,12 +24,13 @@
       <p>密码找回：nodemailer + express-session</p>
       <p>以上模块均可npm下载，使用方法可自行查阅</p>
       <h2>学习曲线：</h2>
-      <p><a href="https://www.expressjs.com.cn/" target="_blank">Express</a>的基础使用 > ejs后端渲染框架（也可选用其它的） > passport-jwt登录验证 > 访问限制express-rate-limit > sqlite3数据库api > RBAC角色权限（这个最难 只是基础使用的话需要自己制作后台的API权限设置）</p>
+      <p><a href="https://www.expressjs.com.cn/" target="_blank">Express</a>的基础使用 > ejs后端渲染框架（也可选用其它的） > passport-jwt登录验证 > 访问限制express-rate-limit > sqlite3数据库api > RBAC角色权限（已制作 API权限管理 角色配置）</p>
       <p>权限模块的权限配置文件在 data/authz_policy.csv</p>
       <p>权限模块文档：
         <br><a href="https://casbin.org/docs/zh-CN/overview" target="_blank">casbin.org/docs/zh-CN/overview</a>(官网较慢)
         <br><a href="https://www.kancloud.cn/oldlei/casbin/" target="_blank">www.kancloud.cn/oldlei/casbin</a>(不全)
       </p>
+      <p>前端仅使用了jquery.js/ 模板引擎art-template/ 弹窗layer.js （算是用较少引入实现更多前端功能）</p>
       <p>my web: <a href="http://www.flashme.cn" target="_blank">www.flashme.cn</a></p>
     </div>
   </div>

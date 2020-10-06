@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据修改</title>
+    <%include header.ejs%>
+    <style>
+        h3{font-weight: bold;margin: 5px;}
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="forms">
+            <div class="formsTitle">
+                <h2>填写角色信息</h2>
+            </div>
+            <form action="javascript:void(0)" id="form1">
+                <input name="id" type="hidden">
+                <dl id="name">
+                    <dt>角色名称</dt>
+                    <dd><input name="name" type="text" maxlength="10"></dd>
+                </dl>
+                <dl>
+                    <dt>角色说明</dt>
+                    <dd><textarea name="explain" id="" cols="60" rows="3" maxlength="100"></textarea></dd>
+                </dl>
+                <dl>
+                    <dt>角色配置</dt>
+                    <dd>
+                        <ul class="quan justify"></ul>
+                    </dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt></dt>
+                    <dd>
+                        <button class="savebtn" onclick="upData()">提交</button>
+                        <button class="resetbtn" onclick=parent.layer.close(frame)>取消</button>
+                    </dd>
+                </dl>
+            </form>
+        </div>
+    </div>
+
+
+    <script id="table-art" type="text/html">
+		{{each}}
+        <li>
+            <label>{{$value}}<input name="role" type="checkbox" value="{{$value}}" id="{{$value}}"></label>
+        </li>
+		{{/each}}
+    </script>
+
+
+    <script>
+
+        var frame = parent.layer.getFrameIndex(window.name);//获取此窗体名
+
+        var posturl, msgstr, ajaxtype;
+        if (location.hash == "#edit") {
+            ajaxtype = "put";
+            posturl = "/role/data";
+            msgstr = "修改成功";
+            $('input[name=id]').val(parent.editdata.id);
+            $('input[name=name]').val(parent.editdata.name);
+            $('textarea[name=explain]').attr('placeholder',parent.editdata.explain);
+            $('h2').text(parent.editdata.name);
+            $('#name').hide();
+        } else if (location.hash == "#add") {
+            ajaxtype = "post";
+            posturl = "/role/data";
+            msgstr = "添加成功";
+        }
+
+
+        function upData() {
+            $.ajax({
+                type: ajaxtype,
+                url: posturl,
+                data: $('#form1').serialize(),
+                dataType: 'json',
+                headers: {
+                    Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+                },
+                success: function (result) {
+                    if (result.state) {
+                        parent.layer.msg(result.msg||msgstr);
+                        parent.layer.close(frame);
+                        parent.listdata && parent.listdata.list();
+                    } else {
+                        parent.layer.msg(result.msg);
+                    }
+
+                },
+                error: function (err) {
+                    if (err.status == 403) {
+                        parent.layer.msg('您无权限操作！');
+                    }
+                }
+            });
+            return;
+        }
+
+
+        //======列出权限表
+
+        $.ajax({
+            type: "get",
+            url: "/role/g",
+            data: {role:parent.editdata.name},
+            dataType: 'json',
+            headers: {
+                Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+            },
+            success: function (result) {
+            console.log("result", result)
+                if (result.state) {
+                    $('.quan').html(template('table-art', result.roles));
+                    for (const k in result.role) {
+                        const element = result.role[k];
+                        $('#'+element).prop('checked',true);
+                    }
+                } else {
+                    parent.layer.msg(result.msg);
+                }
+
+            },
+            error: function (err) {
+                if (err.status == 403) {
+                    parent.layer.msg('您无权限操作！');
+                }
+            }
+        });
+
+
+    </script>
+</body>
+
+</html>

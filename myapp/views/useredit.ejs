@@ -20,7 +20,7 @@
                 <input name="id" type="hidden">
                 <dl>
                     <dt>用户名</dt>
-                    <dd><input name="name" type="text" /></dd>
+                    <dd><input name="name" type="text" maxlength="10" maxlength="12" /></dd>
                 </dl>
                 <hr>
                 <dl>
@@ -42,7 +42,10 @@
                 <hr>
                 <dl>
                     <dt></dt>
-                    <dd><button onclick="upData()">确定</button></dd>
+                    <dd>
+                        <button class="savebtn" onclick="upData()">提交</button>
+                        <button class="resetbtn" onclick=parent.layer.close(frame)>取消</button>
+                    </dd>
                 </dl>
             </form>
         </div>
@@ -51,25 +54,27 @@
 
     <script>
 
-        var page = parent.layer.getFrameIndex(window.name);//获取此窗体名
+        var frame = parent.layer.getFrameIndex(window.name);//获取此窗体名
 
-        var posturl,msgstr;
+        var posturl,msgstr,ajaxtype;
         if (location.hash == "#edit") {
-            posturl="/users/edit";
+            ajaxtype="put";
+            posturl="/users/data";
             msgstr="修改成功";
             $("select[name=role]").val(parent.editdata.role);
             $('input[name=id]').val(parent.editdata.id);
             $('h2').text(parent.editdata.name);
             $('input[name=name]').attr('placeholder',parent.editdata.name);
         }else if (location.hash == "#add"){
-            posturl="/users/add";
+            ajaxtype="post";
+            posturl="/users/data";
             msgstr="添加成功";
         }
 
 
         function upData() {
             $.ajax({
-                type: "POST",
+                type: ajaxtype,
                 url: posturl,
                 data: postObj($('#form1').serializeArray()),
                 dataType: 'json',
@@ -79,8 +84,8 @@
                 success: function (result) {
                     if (result.state) {
                         parent.layer.msg(msgstr);
-                        parent.layer.close(page);
-                        parent.getlist && parent.getlist();
+                        parent.layer.close(frame);
+                        parent.listdata && parent.listdata.list();
                     } else {
                         parent.layer.msg(result.msg);
                     }

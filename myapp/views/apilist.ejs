@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API管理</title>
+    <%include header.ejs%>
+</head>
+
+<body>
+
+    <%include menu.ejs%>
+    <div class="wrapper">
+        <div class="formsTitle">
+            <h2>API管理</h2>
+        </div>
+        <div class="forms">
+            <form action="javascript:void(0)" id="form1">
+                <div class="data_table">
+                    <table>
+                        <thead>
+                            <tr><th><input class="check-all" type="checkbox"> 名称</th><th>路由</th><th>配置</th><th>创建时间</th></tr>
+                        </thead>
+                        <tbody class="listdata"></tbody>
+                    </table>
+                </div>
+                <div class="table_foot">
+                    <div class="right">
+                        <button id="preBtn" class="btn size-14 bg-blue"> < </button>&nbsp;&nbsp;<b ng-bind="page" style="color: yellow"></b> /<span ng-bind="total"></span>&nbsp;&nbsp;<button id="nextBtn" class="btn size-14 bg-blue"> > </button>
+                        总条数：<span ng-bind="length"></span>&nbsp;&nbsp;&nbsp;&nbsp;前往：<input id="gotopage" type="text" style="width: 30px" />
+                    </div>
+                    <button class="del-list btn size-14 bg-ju">批量删除</button><button class="add-btn btn size-14 bg-blue">新增</button>
+                </div>
+            </form>
+        </div>
+        <p>my web: <a href="http://www.flashme.cn" target="_blank">www.flashme.cn</a></p>
+    </div>
+
+
+
+    <script id="table-art" type="text/html">
+		{{each}}
+        <tr>
+            <td class="name" data-name="{{$value.name}}">
+                <input class="check" name="id" type="checkbox" value="{{$value.id}}" {{if $value.route=="/api/data*" || $value.route=="/users/data*" || $value.route=="/role/data*"}} disabled="disabled"{{/if}}> {{$value.name}}
+                <input name="route" type="checkbox" value="{{$value.route}}" style="display:none;">
+            </td>
+            <td class="route">{{$value.route}}</td>
+            <td><a href="javascript:void(0)" onclick="editbtn(this)">修改</a></td>
+            <td>{{$value.time}}</td>
+        </tr>
+		{{/each}}
+	</script>
+
+
+    <script src="/js/getlist.js"></script>
+    <script>
+
+        //获取列表数据
+        var listdata=new getlist("/api/data");
+        listdata.init();
+        listdata.list();
+
+        //删除用户
+        $('.del-list').click(function () {
+            layer.confirm("确定要删除" + $('input[name=id]:checked').length + "条数据？", {
+                btn: ['删除', '不'],
+                title: false, //不显示标题
+                shadeClose: true, //开启遮罩关闭
+                closeBtn: 0, //隐藏关闭按钮
+                // time: 2000, //2秒后自动关闭
+            }, function () {
+                $('input[name=id]:checked').each(function (index, el) {
+                    $(this).siblings('input[name=route]').prop('checked',true);
+                });
+
+                $.ajax({
+                    type: "delete",
+                    url: "/api/data",
+                    data: $('#form1').serialize(),
+                    headers: {
+                        Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+                    },
+                    success: function (result) {
+                        layer.msg(result.msg)
+                        if(result.state){
+                            listdata.list();//更新列表
+                        }
+                    },
+                    error: function (err) {
+                        if(err.status==403){
+                            parent.layer.msg('您无权限操作！');
+                        }
+                    }
+                })
+            });
+
+        })
+
+        //新增用户
+        $('.add-btn').click(function () {
+            editdata={};
+            var layerindex=layer.open({
+                type: 2,
+                title: "新增：",
+                area: ['80%', '90%'],
+                maxmin: true,
+                shadeClose: true,
+                content: '/api/edit#add'
+            });
+        })
+
+        var editdata={}
+        function editbtn(ev) {
+            var tr=$(ev).closest('tr')
+            editdata.id=tr.find('input[name=id]').val();
+            editdata.name=tr.find('.name').data("name");
+            editdata.route=tr.find('input[name=route]').val();
+            var layerindex=layer.open({
+                type: 2,
+                title: "修改："+editdata.name,
+                area: ['80%', '90%'],
+                maxmin: true,
+                shadeClose: true,
+                content: '/api/edit#edit'
+            });
+            //可以执行iframe里的函数
+            // var iframe=document.getElementById("layui-layer-iframe"+layerindex)
+            // var content=iframe.contentWindow;
+            // iframe.onload=function(){
+            //     content.iframeFun();
+            // }
+            
+        }
+
+        tablehead($('.data_table'))
+
+    </script>
+    <script src="/js/login.js"></script>
+</body>
+
+</html>

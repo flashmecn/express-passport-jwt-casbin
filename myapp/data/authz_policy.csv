@@ -1,12 +1,14 @@
-p, SS, *, *
-p, user, /users/*, *
-p, notdel, /users/list*, GET
-p, notdel, /users/add, POST
-p, notdel, /users/edit, POST
-p, onlyadd, /users/list*, GET
-p, onlyadd, /users/add, POST
-p, guest, /users/list*, GET
-g, root, user
+p, admin, *, *
+p, notdel, /users/data*, GET
+p, notdel, /users/data*, POST
+p, notdel, /users/data*, PUT
+p, onlyadd, /users/data*, POST
+p, guest, /users/data*, GET
+p, notdel, /api/data*, GET
+p, notdel, /role/data*, GET
+p, notdel, /role/data*, PUT
+g, root, admin
 g, high, notdel
-g, medium, onlyadd
+g, normal, onlyadd
+g, normal, guest
 g, low, guest

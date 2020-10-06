@@ -4,3 +4,48 @@
 	background: #59779F; padding: 8px 12px;*padding: 8px 0;
 }
 .text_foot hr{border-bottom: #FFF 1px solid;}
+
+.menucon{width: 100%; background: #212a35;}
+#menu{width: 100%;}
+#menu li{font-size: 16px;margin: 10px;}
+#menu li a{color: white;}
+#menu li.active a{color: yellow;}
+.usermenu{float: right;}
+.usermenu li{margin: 5px;}
+.usermenu li,.usermenu li a{line-height: 36px; color: white;}
+
+.titlebtn h2{cursor: pointer;}
+.titlebtn h2:not(.active) {
+	color: purple;
+	background-color: transparent;
+}
+
+.quan li{
+	margin: 10px;padding: 8px 5px; background: #e5f4fd;text-indent: 1em;
+	border-radius: 6px; border: #c0c6d1 1px dotted;
+}
+.quan li:hover{border: #009ac0 1px dashed;box-shadow: rgba(0, 73, 73, 0.2) 2px 5px 16px;}
+
+/*---------------------*\
+ * 提交按钮
+\*---------------------*/
+
+button.savebtn, input[type="submit"].savebtn,input[type="button"].savebtn{
+	background: #f45334;color: #FFF;border: #f45334 1px solid;outline: medium none; padding: 8px 16px;
+	-moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius:6px;
+}
+button.resetbtn,input[type="reset"].resetbtn,input[type="button"].resetbtn{
+	background: #F2F2F2; color: #999;border: #ddd 1px solid;outline: medium none; padding: 8px 16px;
+	-moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius:6px;
+}
+a.savebtn{
+	display: inline; color: #FFF; background: #f45334; padding: 8px 16px; vertical-align: middle;
+	-moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius:6px;
+}
+a.savebtn:hover{color: #FFF;background:#E92600; }

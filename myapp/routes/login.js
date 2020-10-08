@@ -38,7 +38,7 @@ router.post('/', apiLimiter, function (req, res, next) {
     !core.confirmEmail(name) ? json.email = [name] : json.name = [name];
 
     //验证token的用户信息
-    pass.resetUser(json).then(function (row) {
+    user.userget(json).then(function (row) {
         // usually this would be a database call:
         // var theuser = row.find(age => age.name === name);
         var theuser = row[0];

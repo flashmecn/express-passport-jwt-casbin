@@ -11,14 +11,15 @@ exports.userget = function (data) {
     return new Promise(function (resolve, reject) {
         var sql;
         if (data) {//按用户名或邮箱查找
-            var name = "", email = "";
+            var name = "", email = "", id = "";
+            data.id && (id=data.id.join());
             for (var k in data.name) {
                 name += ("'" + data.name[k] + "',")
             }
             for (var n in data.email) {
                 email += ("'" + data.email[n] + "',")
             }
-            sql = "select * from user where name in(" + name.slice(0, -1) + ") or email in(" + email.slice(0, -1) + ")";
+            sql = "select * from user where id in(" + id + ") or name in(" + name.slice(0, -1) + ") or email in(" + email.slice(0, -1) + ")";
         } else {//全部信息
             sql = "select * from user";
         }

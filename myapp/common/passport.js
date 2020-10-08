@@ -6,43 +6,30 @@ var base64url = require("base64url");
 var passport = require("passport");
 var passportJWT = require("passport-jwt");
 
-var ExtractJwt = passportJWT.ExtractJwt;
-var JwtStrategy = passportJWT.Strategy;
 
-
-var jwtOptions = {}
-jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-jwtOptions.secretOrKey = secret;
 
 //获取数据库账户数据
-function resetUser(where) {
-    return new Promise(function (resolve, reject) {
-        user.userget(where ? where : null).then(function (row) {
-
-            var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, done) {
-                // usually this would be a database call:
-                var user = row.find(user => user.id === jwt_payload.id);
-                if (user) {
-                    done(null, user);
-                } else {
-                    done(null, false);
-                }
-            });
-            passport.use(strategy);
-
-            if (row.length > 0) {
-                resolve(row);
-            }else{
-                reject();
+function startjwt() {
+    var ExtractJwt = passportJWT.ExtractJwt;
+    var JwtStrategy = passportJWT.Strategy;
+    var jwtOptions = {}
+    jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+    jwtOptions.secretOrKey = secret;
+    var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, done) {
+        // usually this would be a database call:
+        user.userget({id:[jwt_payload.id]}).then(function (row) {
+            var user = row.find(user => user.id === jwt_payload.id);
+            if (user) {
+                done(null, user);
+            } else {
+                done(null, false);
             }
-
         })
-    })
+    
+    });
+    passport.use(strategy);
 
 }
-
-
-
 
 
 // JWT 验证
@@ -89,5 +76,5 @@ function getToken(token) {
 
 
 module.exports = {
-    passport, secret, createToken, resetUser, getToken
+    passport, secret, createToken, startjwt, getToken
 }

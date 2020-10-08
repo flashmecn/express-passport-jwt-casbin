@@ -43,7 +43,7 @@ var pass = require('./common/passport');
 var bodyParser = require("body-parser");
 
 //用户验证相关
-// pass.resetUser();//获取全部用户数据，开发时启用可一直保持有token数据比对
+pass.startjwt();
 app.use(pass.passport.initialize());
 
 // parse application/x-www-form-urlencoded

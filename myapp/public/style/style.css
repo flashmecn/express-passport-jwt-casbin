@@ -1,7 +1,7 @@
 *{box-sizing: border-box;}
 .table_foot{
-	display: table; width: 100%; height: auto; line-height: 2.6; font-size: 15px;color: #FFF;
-	background: #59779F; padding: 8px 12px;*padding: 8px 0;
+	display: table; width: 100%; height: auto; line-height: 2.6; font-size: 15px;color: #0c2b53;
+	background: #e8f0f3; padding: 8px 12px;*padding: 8px 0;
 }
 .text_foot hr{border-bottom: #FFF 1px solid;}
 

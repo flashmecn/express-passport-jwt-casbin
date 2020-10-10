@@ -61,13 +61,13 @@ var getlist = function (getlisturl) {
                     if (result.state && result.data.length > 0) {
                         $('.listdata').html(template('table-art', result.data));
                     }else{
-                        parent.layer.msg('未获得数据！');
+                        layer.msg('未获得数据！');
                     }
                     startlist = true;
                 },
                 error: function (err) {
                     if (err.status == 403) {
-                        parent.layer.msg('您无权限浏览！请联系管理员！');
+                        layer.msg('您无权限浏览！请联系管理员！');
                     }
                     startlist = true;
                 }

@@ -6,7 +6,7 @@
  +------------------------------------------------------------------------------
  * www.flashme.cn
  * flashme@live.cn
- * 2019-11-19
+ * 2020-10-9
  +------------------------------------------------------------------------------
 */
 body, select, input, textarea {
@@ -222,15 +222,15 @@ input[type="checkbox"],input[type="radio"] {
 
 .forms input[type=text],.forms input[type=password]{
 	height: 28px; line-height: 28px; padding: 0 9px; margin: 5px; vertical-align: middle;
-	border: 1px solid #D0D8DE; box-shadow: 0 1px 1px #D0D8DE inset;
+	border: 1px solid #d8d8d8;
 }
 .forms textarea{
 	line-height: 26px; padding: 0 9px; margin: 5px; vertical-align: top;
-	border: 1px solid #D0D8DE; box-shadow: 0 1px 1px #D0D8DE inset;
+	border: 1px solid #d8d8d8;
 }
 .forms select{
 	height: 28px; line-height: 28px; padding: 0 9px; margin: 5px; vertical-align: middle;
-	border: 1px solid #D0D8DE;
+	border: 1px solid #d8d8d8;
 }
 .forms dd input[type=text],.forms dd input[type=password],.forms dd select,.forms dd textarea{
 	margin: 0 10px 0 0;
@@ -250,6 +250,7 @@ input[type="checkbox"],input[type="radio"] {
 
 .data_table {
 	margin: 0; width: 100%; height: 100%; overflow: auto; position: relative; font-size: 14px;
+	box-shadow: rgba(68, 68, 68, 0.1) 1px 1px 4px; border-bottom: #b6cadb 2px solid;
 }
 .data_table table {
     width: 100%;
@@ -271,22 +272,24 @@ input[type="checkbox"],input[type="radio"] {
 }
 /* 表头配色 */
 .data_table thead th {
-    text-align: left;
-    color:#fff;
-    background-color: #1D7BBE;
+	text-align: left;
+	font-weight: bold;
+    color:#0e61a5;
+	background-color: #e7e7e7;
+	border-bottom: #b6cadb 1px solid;
 }
 /* 隔行变色 行默认颜色 */
 .data_table tbody tr {
-	background-color: #fefefe;
-	color: #686868;
+	background-color: #FFF;
+	color: #555;
 }
 /* 隔行变色 偶数行配色 */
 .data_table tbody tr:nth-child(even) {
-	background-color: #f2f2f2;
+	background-color: #f6f6f6;
 	/*background-color: rgba(243, 242, 255, 0.20);*/
 }
-.data_table tbody tr:hover,.data_table tbody tr:nth-child(even):hover {
-	background-color: #D2E6F6;
+.data_table tbody tr:hover,.data_table tbody tr:active {
+	background-color: #dff0ff;
 }
 
 /* 复选框的列宽 */

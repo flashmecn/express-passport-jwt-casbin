@@ -1,14 +1,16 @@
 p, admin, *, *
+p, notdel, /api/data*, GET
+p, notdel, /role/data*, GET
+p, notdel, /role/data*, PUT
 p, notdel, /users/data*, GET
 p, notdel, /users/data*, POST
 p, notdel, /users/data*, PUT
 p, onlyadd, /users/data*, POST
 p, guest, /users/data*, GET
-p, notdel, /api/data*, GET
-p, notdel, /role/data*, GET
-p, notdel, /role/data*, PUT
+p, setuser, /users/data*, *
 g, root, admin
 g, high, notdel
 g, normal, onlyadd
 g, normal, guest
 g, low, guest
+g, 管理用户, setuser

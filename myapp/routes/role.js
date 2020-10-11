@@ -39,6 +39,10 @@ router.get('/g', function (req, res, next) {
     return core.awaiter(this, void 0, void 0, function* () {
         var role = req.query.role;
         var e = yield enforcer;
+        if (global.policystate) {//当API权限有变动时重新读取角色
+            yield e.loadPolicy();
+            global.policystate = false;
+        }
         var subject;
         e.getAllSubjects().then(function (row) {
             subject = row;
@@ -85,7 +89,7 @@ router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, re
         }
 
         yield e.savePolicy();//保存新规则
-        api.roledel(typeof(id)=='string'?id.split(','):id).then(function (err) {
+        api.roledel(typeof (id) == 'string' ? id.split(',') : id).then(function (err) {
             if (!err) {
                 res.json({ state: true, msg: "删除成功" });
                 // pass.resetUser();
@@ -107,7 +111,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
         res.json({ msg: "请正确填写信息！" });
         return;
     }
-    if(explain.toString().length>100){
+    if (explain.toString().length > 100) {
         res.json({ msg: "说明字数超出100限制！" });
         return;
     }
@@ -142,12 +146,12 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
         res.json({ msg: "未获得修改项！" });
         return;
     }
-    if(explain.toString().length>100){
+    if (explain.toString().length > 100) {
         res.json({ msg: "说明字数超出100限制！" });
         return;
     }
-    if(explain){
-        var updata = { id: id.trim(), data: {explain:explain} }
+    if (explain) {
+        var updata = { id: id.trim(), data: { explain: explain } }
         api.roleedit(updata).then(function (err) {
             if (!err) {
                 editRoles(req.body, res, "修改成功");
@@ -155,7 +159,7 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
                 res.json({ state: false, msg: "修改失败！" });
             }
         })
-    }else{
+    } else {
         editRoles(req.body, res);
     }
 
@@ -180,7 +184,7 @@ function editRoles(body, res, msg) {
 
         // console.log(yield e.getGroupingPolicy());
         yield e.savePolicy();//保存新规则
-        res.json({ state:true, msg: msg||"角色分配成功" });
+        res.json({ state: true, msg: msg || "角色分配成功" });
         //------
     })
 }

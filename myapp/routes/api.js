@@ -82,6 +82,7 @@ router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, re
         }
 
         yield e.savePolicy();//保存新规则
+        global.policystate=true;
         api.apidel(typeof(id)=='string'?id.split(','):id).then(function (err) {
             if (!err) {
                 res.json({ state: true, msg: "删除成功" });
@@ -203,6 +204,7 @@ function editPolicy(body, apiroute, newroute) {
 
         // console.log(yield e.getPolicy());
         yield e.savePolicy();//保存新规则
+        global.policystate=true;
         //------
     })
 }

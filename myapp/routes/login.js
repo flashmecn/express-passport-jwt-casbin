@@ -38,7 +38,7 @@ router.post('/', apiLimiter, function (req, res, next) {
     !core.confirmEmail(name) ? json.email = [name] : json.name = [name];
 
     //验证token的用户信息
-    user.userget(json).then(function (row) {
+    user.userget(json, "id,name,password").then(function (row) {
         // usually this would be a database call:
         // var theuser = row.find(age => age.name === name);
         var theuser = row[0];
@@ -89,7 +89,7 @@ function usercheck(obj, res) {
             return;
         }
         //检查账户
-        user.userget({ name: [obj.name], email: [obj.email] }).then(function (row) {
+        user.userget({ name: [obj.name], email: [obj.email] }, "id,name,email").then(function (row) {
             // usually this would be a database call:
             if (row[0] && row[0].name == obj.name) {
                 res.json({ msg: "已有此用户名！" });
@@ -184,7 +184,7 @@ router.post('/repass', mailLimiter, function (req, res, next) {
 
     //检查账户
     var verify, userid;
-    user.userget({ email: [email] }).then(function (row) {
+    user.userget({ email: [email] }, "id,name,email").then(function (row) {
         if (!row[0] || !row[0].email || row[0].email != email) {
             res.json({ msg: "此邮箱未注册！" });
             return;

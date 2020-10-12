@@ -65,7 +65,7 @@ router.get('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
     var size = req.query.size.trim();
     var page = req.query.page.trim();
     api.rolelist({ size: size, num: page }).then(function (rows) {
-        res.json({ state: true, msg: "列出数据", length: rows.length, data: rows.rows });
+        res.json({ state: true, msg: "列出数据", length: rows.length, data: rows.rows, user: req.user });
     })
 });
 

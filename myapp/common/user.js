@@ -7,7 +7,7 @@ var db = new SqliteDB(core.datapath);
 // db.createTable(createUser);
 
 //获取用户信息
-exports.userget = function (data) {
+exports.userget = function (data,col) {
     return new Promise(function (resolve, reject) {
         var sql;
         if (data) {//按用户名或邮箱查找
@@ -19,7 +19,7 @@ exports.userget = function (data) {
             for (var n in data.email) {
                 email += ("'" + data.email[n] + "',")
             }
-            sql = "select * from user where id in(" + id + ") or name in(" + name.slice(0, -1) + ") or email in(" + email.slice(0, -1) + ")";
+            sql = "select "+(col||"id,name")+" from user where id in(" + id + ") or name in(" + name.slice(0, -1) + ") or email in(" + email.slice(0, -1) + ")";
         } else {//全部信息
             sql = "select * from user";
         }

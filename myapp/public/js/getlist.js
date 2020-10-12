@@ -53,6 +53,18 @@ var getlist = function (getlisturl) {
                 },
                 success: function (result) {
                     console.log(result);
+                    if (!result.state){
+                        layer.confirm(result.msg, {
+                            btn: ['去登录', '知道了'],
+                            title: false, //不显示标题
+                            shadeClose: true, //开启遮罩关闭
+                            closeBtn: 0, //隐藏关闭按钮
+                            // time: 2000, //2秒后自动关闭
+                        }, function () {
+                            window.location.href = "/login#"+window.location.href;
+                        });
+                        return;
+                    }
                     myData.page = page || 1;//页数
                     myData.length = result.length;//总条数
                     myData.total = Math.ceil(result.length / size);//总页数
@@ -60,8 +72,10 @@ var getlist = function (getlisturl) {
                     // $('.listdata').html("");
                     if (result.state && result.data.length > 0) {
                         $('.listdata').html(template('table-art', result.data));
+                        $('.username').length > 0 && $('.username').text(result.user.name);
+                        $('.useremail').length > 0 && $('.useremail').text(result.user.email);
                     }else{
-                        layer.msg('未获得数据！');
+                        window.localStorage.getItem('flashmeToken') && layer.msg('未获得数据！');
                     }
                     startlist = true;
                 },

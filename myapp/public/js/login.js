@@ -10,6 +10,7 @@ $.ajax({
             $('.username').length > 0 && $('.username').text(result.user.name);
             $('.useremail').length > 0 && $('.useremail').text(result.user.email);
         } else {
+            window.localStorage.removeItem('flashmeToken');
             layer.confirm(result.msg, {
                 btn: ['去登录', '知道了'],
                 title: false, //不显示标题

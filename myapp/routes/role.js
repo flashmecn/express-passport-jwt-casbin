@@ -79,6 +79,10 @@ router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, re
             res.json({ msg: "未获得删除项！" });
             return;
         }
+        if(id.toString().trim() == "1" || (id instanceof Array && (id.indexOf("1") != -1 || id.indexOf(1) != -1))){
+            res.json({ msg: "禁止删除初始角色！" });
+            return;
+        }
         var e = yield enforcer;
         if (name instanceof Array) {
             for (var k in name) {
@@ -123,7 +127,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
             return;
         }
         //新增
-        return api.roleadd([name, explain]);
+        return api.roleadd({key:['name','explain'],value:[[name, explain]]});
 
     }).then(function (err) {
         if (!err) {

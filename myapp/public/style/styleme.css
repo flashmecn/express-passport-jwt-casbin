@@ -289,7 +289,7 @@ input[type="checkbox"],input[type="radio"] {
 	/*background-color: rgba(243, 242, 255, 0.20);*/
 }
 .data_table tbody tr:hover,.data_table tbody tr:active {
-	background-color: #dff0ff;
+	background-color: #ebf6ff;
 }
 
 /* 复选框的列宽 */

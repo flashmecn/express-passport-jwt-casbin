@@ -49,7 +49,12 @@ exports.apilist = function (page) {
 //新增数据
 exports.apiadd = function (data) {
     return new Promise(function (resolve, reject) {
-        db.insertData('insert into api(name,route) values(?,?)', [data], function (err) {
+        // 多条录入value:[[],[],...]
+        var vv="";
+        for(var i=0;i<data.key.length;i++){
+            vv+="?,";
+        }
+        db.insertData('insert into api('+data.key.join()+') values('+vv.slice(0, -1)+')', data.value, function (err) {
             resolve(err);
         });
     })
@@ -122,7 +127,12 @@ exports.rolelist = function (page) {
 //新增数据
 exports.roleadd = function (data) {
     return new Promise(function (resolve, reject) {
-        db.insertData('insert into role(name,explain) values(?,?)', [data], function (err) {
+        // 多条录入value:[[],[],...]
+        var vv="";
+        for(var i=0;i<data.key.length;i++){
+            vv+="?,";
+        }
+        db.insertData('insert into role('+data.key.join()+') values('+vv.slice(0, -1)+')', data.value, function (err) {
             resolve(err);
         });
     })

@@ -24,7 +24,7 @@
                 <div class="data_table">
                     <table>
                         <thead>
-                            <tr><th>用户名</th><th>角色</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr>
+                            <tr><th>用户名</th><th>角色</th><th>邮箱</th><th>注册时间</th><th>状态</th><th>操作</th></tr>
                         </thead>
                         <tbody class="listdata"></tbody>
                     </table>
@@ -48,8 +48,9 @@
         <tr>
             <td class="name"><input name="id" type="checkbox" value="{{$value.id}}"> {{$value.name}}</td>
             <td class="role">{{$value.role}}</td>
-            <td>{{$value.email}}</td>
+            <td class="email">{{$value.email}}</td>
             <td>{{$value.time}}</td>
+            <td>{{if $value.level==0}}<font color=red>禁用</font>{{else}}启用{{/if}}<input name="level" type="hidden" value="{{$value.level}}"></td>
             <td><a href="javascript:void(0)" onclick="editbtn(this)">修改</a></td>
         </tr>
 		{{/each}}
@@ -93,14 +94,14 @@
                 closeBtn: 0, //隐藏关闭按钮
                 // time: 2000, //2秒后自动关闭
             }, function () {
-                var list = $('input[name=id]:checked').map(function (index, el) {
-                    return $(this).val();
-                }).get().join(",");
+                // var list = $('input[name=id]:checked').map(function (index, el) {
+                //     return $(this).val();
+                // }).get().join(",");
 
                 $.ajax({
                     type: "delete",
                     url: "/users/data",
-                    data: { id: list },
+                    data: $('#form1').serialize(),
                     headers: {
                         Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
                     },
@@ -125,7 +126,9 @@
             var tr=$(ev).closest('tr')
             editdata.id=tr.find('input[name=id]').val();
             editdata.name=tr.find('.name').text();
+            editdata.email=tr.find('.email').text();
             editdata.role=tr.find('.role').text();
+            editdata.level=tr.find('input[name=level]').val();
             var layerindex=layer.open({
                 type: 2,
                 title: "修改用户："+editdata.name,

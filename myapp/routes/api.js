@@ -114,7 +114,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
             return;
         }
         //新增
-        return api.apiadd([name, newroute]);
+        return api.apiadd({key:['name','route'],value:[[name, newroute]]});
 
     }).then(function (err) {
         if (!err) {

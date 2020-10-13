@@ -30,7 +30,7 @@ exports.userget = function (data,col) {
 }
 exports.userlist = function (page) {
     return new Promise(function (resolve, reject) {
-        var sql = "select id,name,email,time,ctime,role from user";
+        var sql = "select id,name,email,time,ctime,role,level from user";
         db.queryData("Select COUNT(id) from user", function (len) {
             var length = len[0]['COUNT(id)'];
             var line = (page.size<101?page.size:100) * (page.num-1);
@@ -50,7 +50,12 @@ exports.userlist = function (page) {
 //新增注册用户
 exports.useradd = function (data) {
     return new Promise(function (resolve, reject) {
-        db.insertData('insert into user(name,email,password,role) values(?,?,?,?)', [data], function (err) {
+        // 多条录入value:[[],[],...]
+        var vv="";
+        for(var i=0;i<data.key.length;i++){
+            vv+="?,";
+        }
+        db.insertData('insert into user('+data.key.join()+') values('+vv.slice(0, -1)+')', data.value, function (err) {
             resolve(err);
         });
     })

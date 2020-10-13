@@ -60,8 +60,10 @@ router.get('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
 
 router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, next) {
   var name = req.body.name.trim();
+  var email = req.body.email.trim();
   var password = req.body.password.trim();
   var role = req.body.role.trim();
+  var level = req.body.level ? req.body.level : 0;
 
   if (!name || !password) {
     res.json({ msg: "请正确填写注册信息！" });
@@ -73,16 +75,25 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
   }
   //验证用户名合法性
   var regName = core.confirmName(name);
+  var regEmail = core.confirmEmail(email);
   if (regName) {
+    res.json({ msg: regName });
+    return;
+  }
+  if (email && regEmail) {
     res.json({ msg: regName });
     return;
   }
 
   //检查账户
-  user.userget({ name: [name] }).then(function (row) {
+  user.userget({ name: [name||'00'], email:[email||'00'] }).then(function (row) {
     // usually this would be a database call:
     if (row[0] && row[0].name == name) {
       res.json({ msg: "已有此用户名！" });
+      return;
+    }
+    if (row[0] && row[0].email == email) {
+      res.json({ msg: "此邮箱已注册！" });
       return;
     }
     // Hmac加密
@@ -90,7 +101,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
     hash.update(password)
     var miwen = hash.digest('hex')
     //新增账户
-    return user.useradd([name, "", miwen, role]);
+    return user.useradd({key:['name','email','password','role','level'],value:[[name, email, miwen, role, level]]});
 
   }).then(function (err) {
     if (!err) {
@@ -105,9 +116,9 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
 //================================删除账户（删）
 
 router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, next) {
-  var id = req.body.id.trim();
-  if (id.split(',').indexOf("1") != -1) {
-    res.json({ msg: "不允许删除初始管理员！" });
+  var id = req.body.id;
+  if(id.toString().trim() == "1" || (id instanceof Array && (id.indexOf("1") != -1 || id.indexOf(1) != -1))){
+    res.json({ msg: "禁止删除初始管理员！" });
     return;
   }
   user.userdel(id).then(function (err) {
@@ -126,8 +137,10 @@ router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, re
 router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, next) {
   var id = req.body.id.trim();
   var name = req.body.name.trim();
+  var email = req.body.email.trim();
   var password = req.body.password.trim();
   var role = req.body.role.trim();
+  var level = req.body.level ? req.body.level : (id != 1 ? 0 : 1);
 
   // var token = pass.getToken(req.get('Authorization'));//解析用户token内的信息
 
@@ -141,11 +154,16 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
   }
   //验证用户名合法性
   var regName = core.confirmName(name);
+  var regEmail = core.confirmEmail(email);
   if (name && regName) {
     res.json({ msg: regName });
     return;
   }
-  var updata = { id: id, data: { role: role } }
+  if (email && regEmail) {
+    res.json({ msg: regName });
+    return;
+  }
+  var updata = { id: id, data: { role: role, level: level } }
   if (password && password.length < 6) {
     res.json({ msg: "密码需至少6位！" });
     return;
@@ -157,24 +175,25 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
     var miwen = hash.digest('hex')
     updata.data["password"] = miwen;
   }
-  if (role) {
-    updata.data["role"] = role;
-  }
-  if (name) {
+  if (name || email) {
+    console.log("name", name)
     //检查账户
-    user.userget({ name: [name] }).then(function (row) {
+    user.userget({ name: [name||'00'], email:[email||'00'] }).then(function (row) {
       // usually this would be a database call:
       if (row[0] && row[0].name == name) {
         res.json({ msg: "已有此用户名！" });
         return;
       }
-      updata.data["name"] = name;
+      if (row[0] && row[0].email == email) {
+        res.json({ msg: "此邮箱已注册！" });
+        return;
+      }
+      name && (updata.data["name"] = name);
+      email && (updata.data["email"] = email);
       useredit(updata, res);
     })
-  } else if (password || role) {
-    useredit(updata, res);
   } else {
-    res.json({ state: false, msg: "什么也没修改！" });
+    useredit(updata, res);
   }
 
 

@@ -17,9 +17,9 @@ function startjwt() {
     jwtOptions.secretOrKey = secret;
     var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, done) {
         // usually this would be a database call:
-        user.userget({id:[jwt_payload.id]}, "id,name,email,role").then(function (row) {
+        user.userget({id:[jwt_payload.id]}, "id,name,email,role,level").then(function (row) {
             var user = row.find(user => user.id === jwt_payload.id);
-            if (user) {
+            if (user && user.level != 0) {
                 done(null, user);
             } else {
                 done(null, false);

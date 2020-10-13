@@ -20,7 +20,12 @@
                 <input name="id" type="hidden">
                 <dl>
                     <dt>用户名</dt>
-                    <dd><input name="name" type="text" maxlength="10" maxlength="12" /></dd>
+                    <dd><input name="name" type="text" maxlength="12" /></dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt>邮箱</dt>
+                    <dd><input name="email" type="text" maxlength="26" /></dd>
                 </dl>
                 <hr>
                 <dl>
@@ -38,6 +43,11 @@
                             <% } %>
                         </select>
                     </dd>
+                </dl>
+                <hr>
+                <dl>
+                    <dt>状态</dt>
+                    <dd><label>启用<input name="level" type="checkbox" value="1"></label></dd>
                 </dl>
                 <hr>
                 <dl>
@@ -65,6 +75,8 @@
             $('input[name=id]').val(parent.editdata.id);
             $('h2').text(parent.editdata.name);
             $('input[name=name]').attr('placeholder',parent.editdata.name);
+            $('input[name=email]').attr('placeholder',parent.editdata.email);
+            $("input[name=level]").prop('checked',parent.editdata.level=="0" ? false : true);
         }else if (location.hash == "#add"){
             ajaxtype="post";
             posturl="/users/data";

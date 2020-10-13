@@ -42,7 +42,7 @@
     <script id="table-art" type="text/html">
 		{{each}}
         <tr>
-            <td class="name" data-name="{{$value.name}}">
+            <td class="name" data-name="{{$value.name}}" onclick="editbtn(this)">
                 <input class="check" name="id" type="checkbox" value="{{$value.id}}" {{if $value.route=="/api/data*" || $value.route=="/users/data*" || $value.route=="/role/data*"}} disabled="disabled"{{/if}}> {{$value.name}}
                 <input name="route" type="checkbox" value="{{$value.route}}" style="display:none;">
             </td>
@@ -98,13 +98,15 @@
 
         })
 
+        var layerindex;
         //新增用户
         $('.add-btn').click(function () {
             editdata={};
-            var layerindex=layer.open({
+            layerindex && layer.close(layerindex);
+            layerindex=layer.open({
                 type: 2,
                 title: "新增：",
-                area: ['80%', '90%'],
+                area: ['60%', '90%'],
                 maxmin: true,
                 shadeClose: true,
                 content: '/api/edit#add'
@@ -117,12 +119,15 @@
             editdata.id=tr.find('input[name=id]').val();
             editdata.name=tr.find('.name').data("name");
             editdata.route=tr.find('input[name=route]').val();
-            var layerindex=layer.open({
+            layerindex && layer.close(layerindex);
+            layerindex=layer.open({
                 type: 2,
                 title: "修改："+editdata.name,
-                area: ['80%', '90%'],
+                offset: 'r',
+                area: ['60%', '100%'],
                 maxmin: true,
-                shadeClose: true,
+                shade: 0,
+                anim: 2,
                 content: '/api/edit#edit'
             });
             //可以执行iframe里的函数

@@ -173,6 +173,8 @@ function editRoles(body, res, msg) {
     return core.awaiter(this, void 0, void 0, function* () {
         var e = yield enforcer;
 
+        body.name=="root" && (body.role="admin");//限制root角色就是admin权限
+
         // console.log(yield e.getGroupingPolicy());
         const removed = yield e.deleteRolesForUser(body.name.trim());//移除此角色配属
         if (body.role) {

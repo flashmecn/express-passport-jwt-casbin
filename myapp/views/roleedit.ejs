@@ -21,7 +21,7 @@
                 <input name="id" type="hidden">
                 <dl id="name">
                     <dt>角色名称</dt>
-                    <dd><input name="name" type="text" maxlength="10"></dd>
+                    <dd><input name="name" type="text" maxlength="10"><font color=red>一旦提交不可修改！</font></dd>
                 </dl>
                 <dl>
                     <dt>角色说明</dt>
@@ -49,7 +49,7 @@
     <script id="table-art" type="text/html">
 		{{each}}
         <li>
-            <label>{{$value}}<input name="role" type="checkbox" value="{{$value}}" id="{{$value}}"></label>
+            <label>{{$value}}<input name="role" type="checkbox" value="{{$value}}" id="q_{{$value}}"></label>
         </li>
 		{{/each}}
     </script>
@@ -121,7 +121,7 @@
                     $('.quan').html(template('table-art', result.roles));
                     for (const k in result.role) {
                         const element = result.role[k];
-                        $('#'+element).prop('checked',true);
+                        $('#q_'+element).prop('checked',true);
                     }
                 } else {
                     parent.layer.msg(result.msg);

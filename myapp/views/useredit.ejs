@@ -77,6 +77,9 @@
             $('input[name=name]').attr('placeholder',parent.editdata.name);
             $('input[name=email]').attr('placeholder',parent.editdata.email);
             $("input[name=level]").prop('checked',parent.editdata.level=="0" ? false : true);
+            if(parent.editdata.id==1){
+                $("select[name=role]").hide();
+            }
         }else if (location.hash == "#add"){
             ajaxtype="post";
             posturl="/users/data";

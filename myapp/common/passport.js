@@ -17,9 +17,10 @@ function startjwt() {
     jwtOptions.secretOrKey = secret;
     var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, done) {
         // usually this would be a database call:
-        user.userget({id:[jwt_payload.id]}, "id,name,email,role,level").then(function (row) {
+        user.userget({id:[jwt_payload.id]}, "id,name,email,role,level,dtime").then(function (row) {
             var user = row.find(user => user.id === jwt_payload.id);
-            if (user && user.level != 0) {
+            // 必须启用状态 & 只允许最后登录用户
+            if (user && user.level != 0 && jwt_payload.iat == user.dtime) {
                 done(null, user);
             } else {
                 done(null, false);
@@ -35,8 +36,8 @@ function startjwt() {
 // JWT 验证
 const jwt = require("jsonwebtoken");
 
-function createToken(payload) {
-    let created = Math.floor(Date.now() / 1000);
+function createToken(payload, now) {
+    let created = now || Math.floor(Date.now() / 1000);
     payload.iat = created;
     payload.exp = created + 60 * 60 * 2;//token有效期2小时
     return jwt.sign(payload, secret);

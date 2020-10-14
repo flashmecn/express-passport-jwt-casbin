@@ -38,6 +38,7 @@ router.post('/', apiLimiter, function (req, res, next) {
     !core.confirmEmail(name) ? json.email = [name] : json.name = [name];
 
     //验证token的用户信息
+    var payload,created;
     user.userget(json, "id,name,password").then(function (row) {
         // usually this would be a database call:
         // var theuser = row.find(age => age.name === name);
@@ -50,10 +51,9 @@ router.post('/', apiLimiter, function (req, res, next) {
 
 
         if (theuser.password === miwen) {
-            // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
-            var payload = { id: theuser.id };
-            var token = pass.createToken(payload);
-            res.json({ state: true, msg: "登录成功", token: token });
+            payload = { id: theuser.id };
+            created = Math.floor(Date.now() / 1000);
+            return user.useredit({ id: theuser.id, data: { dtime: created } })
         } else {
             res.json({ msg: "密码错误！" });
             // res.status(401).json({ msg: "密码错误！" });
@@ -61,6 +61,13 @@ router.post('/', apiLimiter, function (req, res, next) {
         }
     }, function () {
         res.json({ msg: "没有此用户！" });
+    }).then(function(err){
+        if (!err) {
+            var token = pass.createToken(payload, created);
+            res.json({ state: true, msg: "登录成功", token: token });
+        } else {
+            res.json({ state: false, msg: "登录失败！" });
+        }
     })
 });
 
@@ -158,7 +165,6 @@ router.post('/useradd', limiter, function (req, res, next) {
     }).then(function (err) {
         if (!err) {
             res.json({ state: true, msg: "注册成功" });
-            // pass.resetUser();//更新验证token的用户信息
         } else {
             res.json({ msg: "注册失败！" });
         }
@@ -236,7 +242,6 @@ router.post('/repassword', mailLimiter2, function (req, res, next) {
     user.useredit(updata).then(function (err) {
         if (!err) {
             res.json({ state: true, msg: "修改成功" });
-            // pass.resetUser();
         } else {
             res.json({ state: false, msg: "修改失败！" });
         }

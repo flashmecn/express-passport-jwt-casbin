@@ -34,6 +34,7 @@ router.get('/edit', function (req, res, next) {
 //*
 router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedirect: '/error/auth?msg=请先登录！' }), (req, res, next) => {
   res.locals.username = req.user.role;//获取角色
+  // var token = pass.getToken(req.get('Authorization'));//解析用户token内的信息
   next();
 });
 
@@ -141,8 +142,6 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
   var password = req.body.password.trim();
   var role = req.body.role.trim();
   var level = req.body.level ? req.body.level : (id != 1 ? 0 : 1);
-
-  // var token = pass.getToken(req.get('Authorization'));//解析用户token内的信息
 
   if (req.user.id != 1 && id == 1) {
     res.json({ msg: "您无权限修改初始管理员！" });

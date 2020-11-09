@@ -14,9 +14,9 @@ exports.confirmName = function (value) {
   var reg = /^([\u4E00-\uFA29]|[\uE7C7-\uE7F3]|[a-zA-Z0-9_-]){3,12}$/;
   var reg2 = /^(_|-|[0-9])/;
   if (!reg.test(value)) {
-    return "有户名不合法！限“中英文 数字 _-”3至12个字符";
+    return "名称不合法！限“中英文 数字 _-”3至12个字符";
   } else if (reg2.test(value)) {
-    return "用户名起始不允许数字及符号";
+    return "名称起始不允许数字及符号";
   } else {
     return false;
   }

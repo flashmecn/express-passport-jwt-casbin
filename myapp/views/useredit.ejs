@@ -6,8 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用户修改</title>
     <%include header.ejs%>
-    <style>
-    </style>
+
+    <link rel='stylesheet' href='/style/melist2.css' />
+    <script src="/js/jQuery.Hz2Py-min.js"></script>
+    <script src="/js/melist.js"></script>
+    <!-- 图标样式 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -36,12 +40,16 @@
                 <dl>
                     <dt>角色</dt>
                     <dd>
-                        <select name="role">
-                            <option value="">请选择角色</option>
-                            <% for(var i=0;i<rows.length;i++){ %>
-                            <option value="<%=rows[i].name%>"><%=rows[i].name%></option>
-                            <% } %>
-                        </select>
+                        <input name="oldrole" type="hidden">
+                        <input name="role" type="hidden">
+                        <span class="textroot linkage" linkage="all">
+                            <ol><li><input name="zb" type="checkbox" class="" /></li></ol>
+                            <div class="text">
+                                <input type="text" placeholder="选择角色">
+                                <ul class="soso" id="linkageRole"></ul>
+                                <div class="more">更多</div>
+                            </div>
+                        </span>
                     </dd>
                 </dl>
                 <hr>
@@ -71,7 +79,7 @@
             ajaxtype="put";
             posturl="/users/data";
             msgstr="修改成功";
-            $("select[name=role]").val(parent.editdata.role);
+            $("input[name=oldrole]").val(parent.editdata.role);
             $('input[name=id]').val(parent.editdata.id);
             $('h2').text(parent.editdata.name);
             $('input[name=name]').attr('placeholder',parent.editdata.name);
@@ -91,7 +99,7 @@
             $.ajax({
                 type: ajaxtype,
                 url: posturl,
-                data: postObj($('#form1').serializeArray()),
+                data: $('#form1').serialize(),
                 dataType: 'json',
                 headers: {
                     Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
@@ -113,6 +121,63 @@
                 }
             });
             return;
+        }
+
+        melist();
+        linkageall();
+        $('#linkageRole').bind('select', function (ev, val) {
+            $("input[name=role]").val(val.id);
+        })
+
+        var roletree, stopsort;
+        var _role=parent.editdata.role;
+        $.ajax({
+            type: "GET",
+            url: "/role/data",
+            headers: {
+                Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+            },
+            success: function (result) {
+                console.log(result);
+                roletree=result.infor;
+                //递归查询所在路径
+                rolesort(roletree, []);
+                console.log('新的',roletree);
+                $('#linkageRole').olclear();
+                window.setLinkageAll($("#linkageRole"), roletree);
+
+            },
+            error: function (err) {
+                if (err.status == 403) {
+                    layer.msg('您没有角色浏览权限！当前无法修改角色！');
+                }
+            }
+        })
+        //递归查询路径
+        function rolesort(arr, sort){
+            if(stopsort){
+                return;
+            }
+            for(var i=0;i<arr.length;i++){
+                var newsort=sort.slice();
+                newsort.push(i);
+                if(arr[i].id==_role){
+                    stopsort=true;
+                    console.log(newsort);
+                    treeshow(roletree,newsort);
+                    return;
+                }
+                arr[i].link && arr[i].link.length>0 && rolesort(arr[i].link,newsort)
+            }
+        }
+        //Object添加show
+        function treeshow(tree,sort){
+            tree[sort[0]].show=true;
+            var link=tree[sort[0]].link;
+            if(sort.length>1 && link){
+                sort.shift();
+                treeshow(link,sort);
+            }
         }
 
 

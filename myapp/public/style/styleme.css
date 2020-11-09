@@ -236,8 +236,8 @@ input[type="checkbox"],input[type="radio"] {
 	margin: 0 10px 0 0;
 }
 
-.forms input[type=submit],.forms input[type=button],.forms input[type=reset]{
-	padding: 8px 16px; margin:0 4px; border: none; background: #1D7BBE; color: #FFF; font-size: 15px; vertical-align: middle;
+.forms input[type=submit],.forms input[type=button],.forms input[type=reset],.forms button{
+	padding: 0.5em 0.7em; margin:0 4px; border: none; background: #2180ac; color: #FFF; font-size: 14px; vertical-align: middle; outline:none;
 }
 .forms dl.br{clear: both;}
 

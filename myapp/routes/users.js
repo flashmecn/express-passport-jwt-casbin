@@ -13,6 +13,7 @@ const enforcer = casbin.newEnforcer(path.join(__dirname, '../data/authz_model.co
 var pass = require('../common/passport');
 var user = require('../common/user');
 var core = require('../common/core');
+var api = require('../common/api');
 
 
 //用户管理页
@@ -22,9 +23,7 @@ router.get('/', function (req, res, next) {
 
 /* 修改用户页面. */
 router.get('/edit', function (req, res, next) {
-  user.getrole().then(function (rows) {
-    res.render('useredit', { rows: rows });
-  })
+  res.render('useredit');
 });
 
 
@@ -65,6 +64,12 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
   var password = req.body.password.trim();
   var role = req.body.role.trim();
   var level = req.body.level ? req.body.level : 0;
+  var rolesort = '0,' +  (req.body.rolesort instanceof Array ? req.body.rolesort.join() : req.body.rolesort) + ',';
+  //检查迁移目标是否为可操作子集 并排除自己
+  if (req.user.id != 1 && (rolesort.indexOf(req.user.role + ',') == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length-1] == req.user.role)) {
+    res.json({ msg: "只能移至下级附属角色！" });
+    return;
+  }
 
   if (!name || !password) {
     res.json({ msg: "请正确填写注册信息！" });
@@ -82,12 +87,12 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
     return;
   }
   if (email && regEmail) {
-    res.json({ msg: regName });
+    res.json({ msg: regEmail });
     return;
   }
 
   //检查账户
-  user.userget({ name: [name||'00'], email:[email||'00'] }).then(function (row) {
+  user.userget({ name: [name || '00'], email: [email || '00'] }).then(function (row) {
     // usually this would be a database call:
     if (row[0] && row[0].name == name) {
       res.json({ msg: "已有此用户名！" });
@@ -102,7 +107,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
     hash.update(password)
     var miwen = hash.digest('hex')
     //新增账户
-    return user.useradd({key:['name','email','password','role','level'],value:[[name, email, miwen, role, level]]});
+    return user.useradd({ key: ['name', 'email', 'password', 'role', 'level'], value: [[name, email, miwen, role, level]] });
 
   }).then(function (err) {
     if (!err) {
@@ -118,7 +123,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
 
 router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, next) {
   var id = req.body.id;
-  if(id.toString().trim() == "1" || (id instanceof Array && (id.indexOf("1") != -1 || id.indexOf(1) != -1))){
+  if (id.toString().trim() == "1" || (id instanceof Array && (id.indexOf("1") != -1 || id.indexOf(1) != -1))) {
     res.json({ msg: "禁止删除初始管理员！" });
     return;
   }
@@ -136,69 +141,97 @@ router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, re
 //================================修改账户（改）
 
 router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, next) {
-  var id = req.body.id.trim();
-  var name = req.body.name.trim();
-  var email = req.body.email.trim();
-  var password = req.body.password.trim();
-  var role = req.body.role.trim();
-  var level = req.body.level ? req.body.level : (id != 1 ? 0 : 1);
-
-  if (req.user.id != 1 && id == 1) {
-    res.json({ msg: "您无权限修改初始管理员！" });
-    return;
-  }
-  if (!id) {
+  console.log(req.body);
+  var body = {};
+  body.id = req.body.id;
+  body.name = req.body.name;
+  body.email = req.body.email;
+  body.password = req.body.password;
+  body.oldrole = req.body.oldrole;
+  body.role = req.body.role;
+  body.level = req.body.level ? req.body.level : (body.id != 1 ? 0 : 1);
+  body.rolesort = '0,' +  (req.body.rolesort instanceof Array ? req.body.rolesort.join() : req.body.rolesort) + ',';
+  if (!body.id) {
     res.json({ msg: "没有修改信息！" });
     return;
   }
+  if (req.user.id != 1 && body.id == 1) {
+    res.json({ msg: "您无权限修改初始管理员！" });
+    return;
+  }
   //验证用户名合法性
-  var regName = core.confirmName(name);
-  var regEmail = core.confirmEmail(email);
-  if (name && regName) {
+  var regName = core.confirmName(body.name);
+  var regEmail = core.confirmEmail(body.email);
+  if (body.name && regName) {
     res.json({ msg: regName });
     return;
   }
-  if (email && regEmail) {
-    res.json({ msg: regName });
+  if (body.email && regEmail) {
+    res.json({ msg: regEmail });
     return;
   }
-  var updata = { id: id, data: { role: role, level: level } }
-  if (password && password.length < 6) {
+  if (body.password && body.password.length < 6) {
     res.json({ msg: "密码需至少6位！" });
     return;
   }
-  if (password) {
+
+  //暂时只对角色的操作限制权限
+  //只允许操作子集用户角色
+  if (body.role && req.user.id != 1 && req.user.role != body.oldrole) {
+    //检查迁移目标是否为可操作子集 并排除自己
+    if (body.rolesort.indexOf(req.user.role + ',') == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length-1] == req.user.role) {
+      res.json({ msg: "只能移至下级附属角色！" });
+      return;
+    }
+    //检查操作目标用户是否为登录用户的子集
+    api.roleget({ name: [body.oldrole] }).then(function (row) {
+      if (row[0].level.indexOf(req.user.role + ',') == -1) {
+        res.json({ msg: "越权操作角色！" });
+        return;
+      }
+
+      setuser(body, req, res);
+    })
+  }else{
+    req.user.id != 1 && (body.role=false);
+    setuser(body, req, res);
+  }
+
+
+})
+
+function setuser(body, req, res) {
+  var updata = { id: body.id, oldrole:body.oldrole, data: { level: body.level } }
+  body.role && (updata.data.role = body.role.trim())
+  if (body.password) {
     // Hmac加密
     var hash = crypto.createHmac('sha512', core.key)
     hash.update(password)
     var miwen = hash.digest('hex')
     updata.data["password"] = miwen;
   }
-  if (name || email) {
-    console.log("name", name)
+  if (body.name || body.email) {
     //检查账户
-    user.userget({ name: [name||'00'], email:[email||'00'] }).then(function (row) {
+    user.userget({ name: [body.name.trim() || '00'], email: [body.email.trim() || '00'] }).then(function (row) {
       // usually this would be a database call:
-      if (row[0] && row[0].name == name) {
+      if (row[0] && row[0].name == body.name.trim()) {
         res.json({ msg: "已有此用户名！" });
         return;
       }
-      if (row[0] && row[0].email == email) {
+      if (row[0] && row[0].email == body.email.trim()) {
         res.json({ msg: "此邮箱已注册！" });
         return;
       }
-      name && (updata.data["name"] = name);
-      email && (updata.data["email"] = email);
+      body.name && (updata.data["name"] = body.name.trim());
+      body.email && (updata.data["email"] = body.email.trim());
       useredit(updata, res);
     })
   } else {
     useredit(updata, res);
   }
-
-
-})
+}
 function useredit(updata, res) {
-  user.useredit(updata).then(function (err) {
+  user.useredit(updata, updata.oldrole).then(function (err) {
     if (!err) {
       res.json({ state: true, msg: "修改成功" });
       // pass.resetUser();

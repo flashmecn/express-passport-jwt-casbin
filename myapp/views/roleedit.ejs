@@ -19,13 +19,14 @@
             </div>
             <form action="javascript:void(0)" id="form1">
                 <input name="id" type="hidden">
+                <input name="level" type="hidden">
                 <dl id="name">
                     <dt>角色名称</dt>
                     <dd><input name="name" type="text" maxlength="10"><font color=red>一旦提交不可修改！</font></dd>
                 </dl>
                 <dl>
                     <dt>角色说明</dt>
-                    <dd><textarea name="explain" id="" cols="60" rows="3" maxlength="100"></textarea></dd>
+                    <dd><textarea name="explain" id="" cols="60" rows="3" maxlength="50"></textarea></dd>
                 </dl>
                 <dl>
                     <dt>权限配置</dt>
@@ -73,6 +74,7 @@
             ajaxtype = "post";
             posturl = "/role/data";
             msgstr = "添加成功";
+            $('input[name=level]').val(parent.editdata.sortpath);
         }
 
 
@@ -89,7 +91,7 @@
                     if (result.state) {
                         parent.layer.msg(result.msg||msgstr);
                         parent.layer.close(frame);
-                        parent.listdata && parent.listdata.list();
+                        parent.getTree && parent.getTree();
                     } else {
                         parent.layer.msg(result.msg);
                     }
@@ -130,7 +132,7 @@
             },
             error: function (err) {
                 if (err.status == 403) {
-                    parent.layer.msg('您无权限操作！');
+                    parent.layer.msg('您无操作权限！');
                 }
             }
         });

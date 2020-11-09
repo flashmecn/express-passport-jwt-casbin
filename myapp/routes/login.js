@@ -43,6 +43,9 @@ router.post('/', apiLimiter, function (req, res, next) {
         // usually this would be a database call:
         // var theuser = row.find(age => age.name === name);
         var theuser = row[0];
+        if(theuser.length==0){
+            return "没有此用户！";
+        }
 
         // Hmac加密
         var hash = crypto.createHmac('sha512', core.key)
@@ -55,18 +58,16 @@ router.post('/', apiLimiter, function (req, res, next) {
             created = Math.floor(Date.now() / 1000);
             return user.useredit({ id: theuser.id, data: { dtime: created } })
         } else {
-            res.json({ msg: "密码错误！" });
+            return "密码错误！";
             // res.status(401).json({ msg: "密码错误！" });
             // res.redirect('/error');
         }
-    }, function () {
-        res.json({ msg: "没有此用户！" });
     }).then(function(err){
         if (!err) {
             var token = pass.createToken(payload, created);
             res.json({ state: true, msg: "登录成功", token: token });
         } else {
-            res.json({ state: false, msg: "登录失败！" });
+            res.json({ state: false, msg: err||"登录失败！" });
         }
     })
 });

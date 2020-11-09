@@ -74,6 +74,7 @@ var getlist = function (getlisturl) {
                         $('.listdata').html(template('table-art', result.data));
                         $('.username').length > 0 && $('.username').text(result.user.name);
                         $('.useremail').length > 0 && $('.useremail').text(result.user.email);
+                        $('.userrole').length > 0 && $('.userrole').text(result.user.role);
                     }else{
                         window.localStorage.getItem('flashmeToken') && layer.msg('未获得数据！');
                     }

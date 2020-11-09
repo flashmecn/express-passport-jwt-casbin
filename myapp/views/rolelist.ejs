@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>角色配置</title>
     <%include header.ejs%>
+
+    <link rel='stylesheet' href='/style/melist2.css' />
+    <script src="/js/jQuery.Hz2Py-min.js"></script>
+    <script src="/js/melist.js"></script>
+    <!-- 图标样式 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -16,50 +22,55 @@
             <h2>角色配置</h2>
         </div>
         <div class="forms">
+            <input type="text" class="treeinput" placeholder="检索">
+            <button class="btn add" onclick="addbtn(this,event,'0,','顶级')">新增角色</button>
             <form action="javascript:void(0)" id="form1">
-                <div class="data_table">
-                    <table>
-                        <thead>
-                            <tr><th><input class="check-all" type="checkbox"> 用户角色</th><th>配置</th><th>说明</th></tr>
-                        </thead>
-                        <tbody class="listdata"></tbody>
-                    </table>
-                </div>
-                <div class="table_foot">
-                    <div class="right">
-                        <button id="preBtn" class="btn size-14 bg-blue"> < </button>&nbsp;&nbsp;<b ng-bind="page" style="color: blue"></b> /<span ng-bind="total"></span>&nbsp;&nbsp;<button id="nextBtn" class="btn size-14 bg-blue"> > </button>
-                        总条数：<span ng-bind="length"></span>&nbsp;&nbsp;&nbsp;&nbsp;前往：<input id="gotopage" type="text" style="width: 30px" />
-                    </div>
-                    <button class="del-list btn size-14 bg-ju">批量删除</button><button class="add-btn btn size-14 bg-blue">新增</button>
+                <div class="tree">
+                    <ul></ul>
                 </div>
             </form>
+            <span class="textroot linkage" linkage="all">
+                <ol><li><input name="zb" type="checkbox" class="" /></li></ol>
+                <div class="text">
+                    <input type="text" placeholder="修改至">
+                    <ul class="soso" id="linkageRole"></ul>
+                    <div class="more">更多</div>
+                </div>
+            </span>
+            <button onclick="upLevel()">确定</button><i style="font-size: 10px;">子集也会随之迁移</i>
+            <hr>
         </div>
         <p>my web: <a href="http://www.flashme.cn" target="_blank">www.flashme.cn</a></p>
     </div>
 
 
 
-    <script id="table-art" type="text/html">
+    <script id="treeli-art" type="text/html">
 		{{each}}
-        <tr>
-            <td class="name">
-                <input class="check" name="id" type="checkbox" value="{{$value.id}}" {{if $value.name=="root"}} disabled="disabled"{{/if}}> {{$value.name}}
-                <input name="name" type="checkbox" value="{{$value.name}}" style="display:none;">
-            </td>
-            <td><a href="javascript:void(0)" onclick="editbtn(this)">分配权限</a></td>
-            <td class="explain">{{$value.explain}}</td>
-        </tr>
+        <li>
+            <span title="{{$value.explain}}">
+                {{if $value.link}}
+                <i class="fa"></i>
+                {{/if}}
+                <input name="id" class="check" type="radio" value="{{$value.id}}">
+                <input name="explain" type="hidden" value="{{$value.explain}}">
+                <h3>{{$value.title}}</h3>
+                <button class="btn" href="javascript:void(0)" onclick="editbtn(this,event)">分配权限</button>
+                <button class="btn add" onclick="addbtn(this,event, '{{$value.level+$value.id+','}}', '{{$value.id}}')">新增子类</button>
+            </span>
+            {{if $value.link}}
+            <ul>
+                {{include 'treeli-art' $value.link}}
+            </ul>
+            {{/if}}
+        </li>
 		{{/each}}
-	</script>
+    </script>
 
 
-    <script src="/js/getlist.js"></script>
+
     <script>
 
-        //获取列表数据
-        var listdata=new getlist("/role/data");
-        listdata.init();
-        listdata.list();
 
         //删除数据
         $('.del-list').click(function () {
@@ -97,25 +108,28 @@
 
         })
 
+        var editdata={}
         //新增数据
-        $('.add-btn').click(function () {
-            editdata={};
+        function addbtn(ev,event,sort,role) {
+            editdata={sortpath:sort};
             var layerindex=layer.open({
                 type: 2,
-                title: "新增：",
+                title: "新增至 "+role+" 下",
                 area: ['720px', '90%'],
                 maxmin: true,
                 shadeClose: true,
                 content: '/role/edit#add'
             });
-        })
+            event.preventDefault();
+            event.stopPropagation();
+        }
 
-        var editdata={}
-        function editbtn(ev) {
-            var tr=$(ev).closest('tr')
+        function editbtn(ev,event) {
+            var tr=$(ev).closest('li')
+            editdata={};
             editdata.id=tr.find('input[name=id]').val();
-            editdata.name=tr.find('input[name=name]').val();
-            editdata.explain=tr.find('.explain').text();
+            editdata.name=tr.find('input[name=id]').val();
+            editdata.explain=tr.find('input[name=explain]').val();
             var layerindex=layer.open({
                 type: 2,
                 title: "修改："+editdata.name,
@@ -134,10 +148,113 @@
             // iframe.onload=function(){
             //     content.iframeFun();
             // }
+            event.preventDefault();
+            event.stopPropagation();
             
         }
 
-        tablehead($('.data_table'))
+        var _sortpath="0,",_sortid;
+        function levelpath(){
+            _sortpath="0,";
+            _sortid=$('.tree input[name=id]:checked').val();
+            if(!_sortid){
+                _sortpath="";
+                $('#linkageRole').olclear();
+                layer.msg('请先选择角色！');
+                return;
+            }
+            $('.linkage input[name=rolesort]:checked').each(function(index, el) {
+                _sortpath+=$(this).val()+",";
+                if($(this).val()==_sortid){
+                    _sortpath="";
+                    layer.msg('不能移至自身及子集！');
+                    return false;
+                }
+            });
+        }
+
+        melist();
+        linkageall();
+        $('#linkageRole').bind('select', function (ev, val) {
+            console.log(val);
+            levelpath();
+        })
+        var treesoso = new treelist($('.tree'), $(".treeinput"));
+
+        function getTree(){
+
+            $.ajax({
+                type: "GET",
+                url: "/role/data",
+                headers: {
+                    Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+                },
+                success: function (result) {
+                    console.log(result);
+                    if (!result.state) {
+                        layer.confirm(result.msg, {
+                            btn: ['去登录', '知道了'],
+                            title: false, //不显示标题
+                            shadeClose: true, //开启遮罩关闭
+                            closeBtn: 0, //隐藏关闭按钮
+                            // time: 2000, //2秒后自动关闭
+                        }, function () {
+                            window.location.href = "/login#" + window.location.href;
+                        });
+                        return;
+                    }
+                    treesoso.init(result.infor);
+                    treesoso.show();
+
+                    $('#linkageRole').olclear();
+                    window.setLinkageAll($("#linkageRole"), result.infor);
+                    $('.username').length > 0 && $('.username').text(result.user.name);
+                    $('.useremail').length > 0 && $('.useremail').text(result.user.email);
+                    $('.userrole').length > 0 && $('.userrole').text(result.user.role);
+
+                },
+                error: function (err) {
+                    if (err.status == 403) {
+                        layer.msg('您无权限浏览！请联系管理员！');
+                    }
+                }
+            })
+        }
+        getTree();
+
+        //修改级别
+        function upLevel() {
+            levelpath();
+            if(!_sortpath || !_sortid){
+                layer.msg('请正确选择迁移目标及路径！');
+                return;
+            }
+            $.ajax({
+                type: "PUT",
+                url: "/role/data",
+                data: {sortpath:_sortpath,sortid:_sortid},
+                dataType: 'json',
+                headers: {
+                    Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+                },
+                success: function (result) {
+                    if (result.state) {
+                        getTree();
+                        layer.msg(result.msg);
+                    } else {
+                        layer.msg(result.msg);
+                    }
+
+                },
+                error: function (err) {
+                    if (err.status == 403) {
+                        parent.layer.msg('您无权限操作！');
+                    }
+                }
+            });
+            return;
+        }
+
 
     </script>
 </body>

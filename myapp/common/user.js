@@ -69,21 +69,21 @@ exports.userdel = function (data) {
     })
 }
 //修改用户
-exports.useredit = function (data) {
+exports.useredit = function (data, oldrole) {
     return new Promise(function (resolve, reject) {
         var str = "";
         for (var k in data.data) {
             str += (k + '="' + data.data[k] + '",')
         }
-        db.executeSql('update user set ' + str.slice(0, -1) + ' where id=' + data.id, function (err) {
+        db.executeSql('update user set ' + str.slice(0, -1) + ' where id=' + data.id + (oldrole?' and role="'+oldrole+'"':''), function (err) {
             resolve(err);
         });
     })
 }
 //获取权限表role
-exports.getrole = function () {
+exports.getrole = function (name) {
     return new Promise(function (resolve, reject) {
-        db.queryData('select * from role', function (row) {
+        db.queryData('select * from role where name='+name, function (row) {
             resolve(row);
         })
     })

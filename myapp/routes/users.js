@@ -64,7 +64,8 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
   var password = req.body.password.trim();
   var role = req.body.role.trim();
   var level = req.body.level ? req.body.level : 0;
-  var rolesort = '0,' +  (req.body.rolesort instanceof Array ? req.body.rolesort.join() : req.body.rolesort) + ',';
+	var rolesort = req.body.rolesort ? ((req.body.rolesort instanceof Array ? req.body.rolesort.join() : req.body.rolesort) + ',') : '';
+	rolesort = '0,' + rolesort;
   //检查迁移目标是否为可操作子集 并排除自己
   if (req.user.id != 1 && (rolesort.indexOf(req.user.role + ',') == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length-1] == req.user.role)) {
     res.json({ msg: "只能移至下级附属角色！" });
@@ -150,7 +151,8 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
   body.oldrole = req.body.oldrole;
   body.role = req.body.role;
   body.level = req.body.level ? req.body.level : (body.id != 1 ? 0 : 1);
-  body.rolesort = '0,' +  (req.body.rolesort instanceof Array ? req.body.rolesort.join() : req.body.rolesort) + ',';
+	var rolesort = req.body.rolesort ? ((req.body.rolesort instanceof Array ? req.body.rolesort.join() : req.body.rolesort) + ',') : '';
+	body.rolesort = '0,' + rolesort;
   if (!body.id) {
     res.json({ msg: "没有修改信息！" });
     return;
@@ -206,7 +208,7 @@ function setuser(body, req, res) {
   if (body.password) {
     // Hmac加密
     var hash = crypto.createHmac('sha512', core.key)
-    hash.update(password)
+    hash.update(body.password)
     var miwen = hash.digest('hex')
     updata.data["password"] = miwen;
   }

@@ -237,7 +237,7 @@ input[type="checkbox"],input[type="radio"] {
 }
 
 .forms input[type=submit],.forms input[type=button],.forms input[type=reset],.forms button{
-	padding: 0.5em 0.7em; margin:0 4px; border: none; background: #2180ac; color: #FFF; font-size: 14px; vertical-align: middle; outline:none;
+	padding: 0.5em 0.7em; margin:0 4px; border: none; background: #163155; color: #FFF; font-size: 14px; vertical-align: middle; outline:none;
 }
 .forms dl.br{clear: both;}
 

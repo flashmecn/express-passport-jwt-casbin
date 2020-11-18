@@ -134,6 +134,7 @@ router.post('/register', createAccountLimiter, function (req, res, next) {
     var email = req.body.email.trim();
 
     usercheck({ name: name, password: password, email: email }, res).then(function () {
+        req.session.register_name = name;
         res.redirect(307, "useradd");
     })
 
@@ -150,26 +151,28 @@ const limiter = rateLimit({
     }
 });
 router.post('/useradd', limiter, function (req, res, next) {
-    var name = req.body.name.trim();
-    var password = req.body.password.trim();
-    var email = req.body.email.trim();
+    var name = req.body.name;
+    var password = req.body.password;
+    var email = req.body.email;
 
-    usercheck({ name: name, password: password, email: email }, res).then(function () {
-
+    if(req.session.register_name == name){
+        delete req.session.register_name;
         // Hmac加密
         var hash = crypto.createHmac('sha512', core.key)
         hash.update(password)
         var miwen = hash.digest('hex')
         //新增账户
-        return user.useradd([name, email, miwen])
+        return user.useradd([name, email, miwen]).then(function (err) {
+            if (!err) {
+                res.json({ state: true, msg: "注册成功" });
+            } else {
+                res.json({ msg: "注册失败！" });
+            }
+        })
 
-    }).then(function (err) {
-        if (!err) {
-            res.json({ state: true, msg: "注册成功" });
-        } else {
-            res.json({ msg: "注册失败！" });
-        }
-    })
+    }else{
+        res.json({ msg: "非法进入！" });
+    }
 })
 //===============================================用户注册END
 
@@ -205,9 +208,7 @@ router.post('/repass', mailLimiter, function (req, res, next) {
         })
 
     }).then(function () {
-        req.session.verify_code = verify;
-        req.session.verify_email = email;
-        req.session.verify_id = userid;
+        req.session.verify = {code:verify, email:email, id:userid}
         res.json({ state: true, msg: "发送成功" });
     }, function (err) {
         res.json({ state: false, msg: "发送失败！" + err });
@@ -226,7 +227,7 @@ router.post('/repassword', mailLimiter2, function (req, res, next) {
     var email = req.body.email.trim();
     var verify = req.body.verify.trim();
     var password = req.body.password.trim();
-    if (email != req.session.verify_email || verify != req.session.verify_code) {
+    if (email != req.session.verify.email || verify != req.session.verify.code) {
         res.json({ msg: "验证失败！" });
         return;
     }
@@ -239,11 +240,13 @@ router.post('/repassword', mailLimiter2, function (req, res, next) {
     hash.update(password)
     var miwen = hash.digest('hex')
 
-    var updata = { id: req.session.verify_id, data: { password: miwen } }
+    var updata = { id: req.session.verify.id, data: { password: miwen } }
     user.useredit(updata).then(function (err) {
         if (!err) {
+            delete req.session.verify;
             res.json({ state: true, msg: "修改成功" });
         } else {
+            delete req.session.verify;
             res.json({ state: false, msg: "修改失败！" });
         }
     })

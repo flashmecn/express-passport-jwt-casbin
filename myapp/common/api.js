@@ -146,7 +146,7 @@ exports.rolelevel = function (data) {
                 //修改子集路径
                 var oldsort=data.oldsort+data.sortid+',';
                 var newsort=data.newsort+data.sortid+',';
-                db.executeSql('update role set level=replace(level,"' + oldsort + '","' + newsort + '") where level like "%' + oldsort + '%"', function (err) {
+                db.executeSql('update role set level=replace(level,"' + oldsort + '","' + newsort + '") where level like "' + oldsort + '%"', function (err) {
                     resolve(err);
                 });
             }

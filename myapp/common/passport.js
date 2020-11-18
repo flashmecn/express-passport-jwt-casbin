@@ -20,7 +20,7 @@ function startjwt() {
         user.userget({id:[jwt_payload.id]}, "id,name,email,role,level,dtime").then(function (row) {
             var user = row.find(user => user.id === jwt_payload.id);
             // 必须启用状态 & 只允许最后登录用户
-            if (user && user.level != 0 && jwt_payload.iat == user.dtime) {
+            if (row && row.level != 0 && (jwt_payload.auto == true || jwt_payload.iat == row.dtime)) {
                 done(null, user);
             } else {
                 done(null, false);
@@ -45,12 +45,10 @@ function createToken(payload, now) {
 
 // function checkToken(token) {
 //     return new Promise((resolve, reject) => {
-//         jwt.verify(token, secret, (err, res) => {
+//         jwt.verify(token, secret, err => {
 //             if (!err) {
-//                 console.log("checkToken -> res", res)
 //                 resolve(res)
 //             } else {
-//                 console.log("checkToken -> err", res)
 //                 reject("token验证失败");
 //             }
 //         })
@@ -77,5 +75,5 @@ function getToken(token) {
 
 
 module.exports = {
-    passport, secret, createToken, startjwt, getToken
+    passport, secret, createToken, startjwt, getToken, jwt
 }

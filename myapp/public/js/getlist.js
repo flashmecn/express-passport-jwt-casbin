@@ -9,21 +9,21 @@ var getlist = function (getlisturl) {
             var that = this;
             //上一页
             $('#preBtn').click(function () {
-                if (nowPage > 1) {
+                if (nowPage > 1 && startlist) {
                     nowPage--;
                     that.list(nowPage, limit);
                 }
             })
             //下一页
             $('#nextBtn').click(function () {
-                if (nowPage < myData.total) {
+                if (nowPage < myData.total && startlist) {
                     nowPage++;
                     that.list(nowPage, limit);
                 }
             })
             //跳转页码
             $('#gotopage').keyup(function (event) {
-                if (event.keyCode == 13) {
+                if (event.keyCode == 13 && startlist) {
                     var num = parseInt($(this).val());
                     if (num < 1 || num > myData.total) {
                         return;

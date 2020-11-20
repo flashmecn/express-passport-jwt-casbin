@@ -179,12 +179,16 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
 
   //暂时只对角色的操作限制权限
   //只允许操作子集用户角色
-  if (body.role && req.user.id != 1 && req.user.role != body.oldrole) {
-    //检查迁移目标是否为可操作子集 并排除自己
-    if (body.rolesort.split(',').indexOf(req.user.role) == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length-1] == req.user.role) {
-      res.json({ msg: "只能移至下级附属角色！" });
-      return;
-    }
+  if (body.role && body.role != body.oldrole) {
+		//检查迁移目标是否为可操作子集 并排除自己
+		if (req.user.id != 1 && ( body.rolesort.split(',').indexOf(req.user.role) == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length - 1] == req.user.role )) {
+			res.json({ msg: "只能移至下级附属角色！" });
+			return;
+		}
+		if(body.id==1 || body.id=='1'){
+			res.json({ msg: "超级管理员角色禁止修改！" });
+			return;
+		}
     //检查操作目标用户是否为登录用户的子集
     api.roleget({ name: [body.oldrole] }).then(function (row) {
       if (row[0].level.split(',').indexOf(req.user.role) == -1) {

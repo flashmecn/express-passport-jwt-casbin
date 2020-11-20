@@ -153,7 +153,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
         res.json({ msg: "说明字数超出50限制！" });
         return;
     }
-    if (req.user.id != 1 && level.indexOf(req.user.role + ',') != -1) {
+    if (req.user.id != 1 && level.split(',').indexOf(req.user.role) != -1) {
         res.json({ msg: "越权操作！只能添加子集角色！" });
         return;
     }
@@ -189,7 +189,7 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
     var sortpath = req.body.sortpath;
     var sortid = req.body.sortid;
     if (sortpath && sortid) {
-        if (sortpath.indexOf(sortid + ',') != -1) {
+        if (sortpath.split(',').indexOf(sortid) != -1) {
             res.json({ msg: "不能移至自身及子集！" });
             return;
         }
@@ -211,7 +211,7 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
     }
     api.roleget({ name: [name] }).then(function (row) {
         //修改目标是否为自己或用户子集
-        if (req.user.id != 1 && req.user.role != name && row[0].level.indexOf(req.user.role + ',') == -1) {
+        if (req.user.id != 1 && req.user.role != name && row[0].level.split(',').indexOf(req.user.role) == -1) {
             res.json({ msg: "非法越权操作！" });
         }
         if (explain) {
@@ -232,7 +232,7 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
 function setlevel(body, req, res) {
     api.roleget({ name: [body.sortid] }).then(function (row) {
         //修改目标 | 迁移目标 是否为用户子集
-        if (req.user.id != 1 && (row[0].level.indexOf(req.user.role + ',') == -1 || body.sortpath.indexOf(req.user.role + ',') == -1)) {
+        if (req.user.id != 1 && (row[0].level.split(',').indexOf(req.user.role) == -1 || body.sortpath.split(',').indexOf(req.user.role) == -1)) {
             return "非法越权操作！";
         }
         //迁移目标及其子集

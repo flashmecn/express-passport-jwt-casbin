@@ -67,7 +67,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
 	var rolesort = req.body.rolesort ? ((req.body.rolesort instanceof Array ? req.body.rolesort.join() : req.body.rolesort) + ',') : '';
 	rolesort = '0,' + rolesort;
   //检查迁移目标是否为可操作子集 并排除自己
-  if (req.user.id != 1 && (rolesort.indexOf(req.user.role + ',') == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length-1] == req.user.role)) {
+  if (req.user.id != 1 && (rolesort.split(',').indexOf(req.user.role) == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length-1] == req.user.role)) {
     res.json({ msg: "只能移至下级附属角色！" });
     return;
   }
@@ -181,13 +181,13 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
   //只允许操作子集用户角色
   if (body.role && req.user.id != 1 && req.user.role != body.oldrole) {
     //检查迁移目标是否为可操作子集 并排除自己
-    if (body.rolesort.indexOf(req.user.role + ',') == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length-1] == req.user.role) {
+    if (body.rolesort.split(',').indexOf(req.user.role) == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length-1] == req.user.role) {
       res.json({ msg: "只能移至下级附属角色！" });
       return;
     }
     //检查操作目标用户是否为登录用户的子集
     api.roleget({ name: [body.oldrole] }).then(function (row) {
-      if (row[0].level.indexOf(req.user.role + ',') == -1) {
+      if (row[0].level.split(',').indexOf(req.user.role) == -1) {
         res.json({ msg: "越权操作角色！" });
         return;
       }

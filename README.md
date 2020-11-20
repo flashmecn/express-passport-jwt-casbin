@@ -29,7 +29,7 @@ http://localhost:3000/
 > 以上模块均可npm下载，使用方法可自行查阅
 
 ## 学习曲线：
-Express的基础使用 > ejs后端渲染框架（也可选用其它的） > passport-jwt登录验证 > 访问限制express-rate-limit > sqlite3数据库api > casbin（RBAC角色权限） > sequelize（数据库ORM）
+Express的基础使用 > ejs后端渲染框架（也可选用其它的） > passport-jwt登录验证 > 访问限制express-rate-limit > sqlite3数据库api > casbin（RBAC角色权限） > sequelize（数据库ORM 研究中...）
 
 权限模块的权限配置文件在 data/authz_policy.csv
 

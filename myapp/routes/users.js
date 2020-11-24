@@ -191,7 +191,7 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
 		}
     //检查操作目标用户是否为登录用户的子集
     api.roleget({ name: [body.oldrole] }).then(function (row) {
-      if (row[0].level.split(',').indexOf(req.user.role) == -1) {
+      if (req.user.id != 1 && row[0].level.split(',').indexOf(req.user.role) == -1) {
         res.json({ msg: "越权操作角色！" });
         return;
       }

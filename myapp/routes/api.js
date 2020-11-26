@@ -37,6 +37,10 @@ router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedir
 router.get('/p', function (req, res, next) {
     return core.awaiter(this, void 0, void 0, function* () {
         var e = yield enforcer;
+        if (global.policystate) {//当有变动时重新读取
+            yield e.loadPolicy();
+            global.policystate = false;
+        }
         var route = req.query.route;
         var subject;
         e.getAllSubjects().then(function (row) {

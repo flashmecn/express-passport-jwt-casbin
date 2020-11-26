@@ -270,6 +270,7 @@ function editRoles(body, res, msg) {
 
         // console.log(yield e.getGroupingPolicy());
         yield e.savePolicy();//保存新规则
+        global.policystate = true;
         res.json({ state: true, msg: msg || "角色分配成功" });
         //------
     })

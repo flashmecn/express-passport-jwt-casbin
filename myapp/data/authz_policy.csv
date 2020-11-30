@@ -1,4 +1,3 @@
-p, admin, *, *
 p, notdel, /api/data*, GET
 p, notdel, /role/data*, GET
 p, notdel, /role/data*, PUT
@@ -9,7 +8,6 @@ p, notdel, /users/data*, PUT
 p, setuser, /users/data*, *
 p, onlyadd, /users/data*, POST
 p, guest, /users/data*, GET
-g, root, admin
 g, high, notdel
 g, 管理用户, setuser
 g, test, setuser

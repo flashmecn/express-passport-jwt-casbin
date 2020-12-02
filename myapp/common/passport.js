@@ -20,7 +20,7 @@ function startjwt() {
         user.userget({id:[jwt_payload.id]}, "id,name,email,role,level,dtime").then(function (row) {
             var user = row.find(user => user.id === jwt_payload.id);
             // 必须启用状态 & 只允许最后登录用户
-            if (row && row.level != 0 && (jwt_payload.auto == true || jwt_payload.iat == row.dtime)) {
+            if (row && row.level != 0 && (jwt_payload.auto == true || jwt_payload.iat == user.dtime)) {
                 done(null, user);
             } else {
                 done(null, false);

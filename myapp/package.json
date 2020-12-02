@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev":"nodemon app.js -i ./data/"
+    "dev": "nodemon app.js -i ./data/"
   },
   "dependencies": {
     "base64url": "^3.0.1",

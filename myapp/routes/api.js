@@ -27,7 +27,7 @@ router.get('/edit', function (req, res, next) {
 //*
 //=================================登录判断，给下面权限模块判断 res.locals.username
 //*
-router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedirect: '/error/auth?msg=登录过期！' }), (req, res, next) => {
+router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedirect: '/error/auth' }), (req, res, next) => {
     res.locals.username = req.user.role;//获取角色
     next();
 });
@@ -62,7 +62,7 @@ router.get('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
     var size = req.query.size.trim();
     var page = req.query.page.trim();
     api.apilist({ size: size, num: page }).then(function (rows) {
-        res.json({ state: true, msg: "列出数据", length: rows.length, data: rows.rows, user: req.user });
+        res.json({ state: true, msg: "列出数据", length: rows.length, rows: rows.rows, user: req.user });
     })
 });
 

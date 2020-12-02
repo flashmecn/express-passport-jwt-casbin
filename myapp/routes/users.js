@@ -178,8 +178,8 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
   }
 
   //暂时只对角色的操作限制权限
-  //只允许操作子集用户角色 除非超级管理员
-	if ((body.role && body.role != body.oldrole && body.oldrole) || req.user.role == "root") {
+  //只允许操作子集用户角色
+  if (body.role && body.role != body.oldrole) {
 		//检查迁移目标是否为可操作子集 并排除自己
 		if (req.user.id != 1 && ( body.rolesort.split(',').indexOf(req.user.role) == -1 || req.body.rolesort == req.user.role || req.body.rolesort[req.body.rolesort.length - 1] == req.user.role )) {
 			res.json({ msg: "只能移至下级附属角色！" });

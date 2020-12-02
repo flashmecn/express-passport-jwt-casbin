@@ -153,7 +153,7 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
         res.json({ msg: "说明字数超出50限制！" });
         return;
     }
-    if (req.user.id != 1 && level.split(',').indexOf(req.user.role) != -1) {
+    if (req.user.id != 1 && level.split(',').indexOf(req.user.role) == -1) {
         res.json({ msg: "越权操作！只能添加子集角色！" });
         return;
     }

@@ -209,9 +209,13 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
         res.json({ msg: "说明字数超出50限制！" });
         return;
     }
+    if(req.user.id != 1 && req.user.role == name){
+        res.json({ msg: "无法操作自身角色！" });
+        return;
+    }
     api.roleget({ name: [name] }).then(function (row) {
-        //修改目标是否为自己或用户子集
-        if (req.user.id != 1 && req.user.role != name && row[0].level.split(',').indexOf(req.user.role) == -1) {
+        //修改目标是否为用户子集
+        if (req.user.id != 1 && row[0].level.split(',').indexOf(req.user.role) == -1) {
             res.json({ msg: "非法越权操作！" });
         }
         if (explain) {

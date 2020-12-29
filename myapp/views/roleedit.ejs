@@ -63,7 +63,7 @@
         var posturl, msgstr, ajaxtype;
         if (location.hash == "#edit") {
             ajaxtype = "put";
-            posturl = "/role/data";
+            posturl = "/admin/role/data";
             msgstr = "修改成功";
             $('input[name=id]').val(parent.editdata.id);
             $('input[name=name]').val(parent.editdata.name);
@@ -72,8 +72,9 @@
             $('#name').hide();
         } else if (location.hash == "#add") {
             ajaxtype = "post";
-            posturl = "/role/data";
+            posturl = "/admin/role/data";
             msgstr = "添加成功";
+            $('h2').text(parent.editdata.title);
             $('input[name=level]').val(parent.editdata.sortpath);
         }
 
@@ -89,17 +90,17 @@
                 },
                 success: function (result) {
                     if (result.state) {
-                        parent.layer.msg(result.msg||msgstr);
+                        parent.layer.msg(result.msg||msgstr,{zIndex: parent.layer.zIndex});
                         parent.layer.close(frame);
                         parent.getTree && parent.getTree();
                     } else {
-                        parent.layer.msg(result.msg);
+                        parent.layer.msg(result.msg,{zIndex: parent.layer.zIndex});
                     }
 
                 },
                 error: function (err) {
                     if (err.status == 403) {
-                        parent.layer.msg('您无权限操作！');
+                        parent.layer.msg('您无权限操作！',{zIndex: parent.layer.zIndex});
                     }
                 }
             });
@@ -111,7 +112,7 @@
 
         $.ajax({
             type: "get",
-            url: "/role/g",
+            url: "/admin/role/g",
             data: {role:parent.editdata.name},
             dataType: 'json',
             headers: {

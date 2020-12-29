@@ -34,17 +34,24 @@ router.post('/', apiLimiter, function (req, res, next) {
         res.json({ msg: "请填写登陆名与密码！" });
         return;
     }
-    var json = {};
-    !core.confirmEmail(name) ? json.email = [name] : json.name = [name];
+    if(core.sqlstring(name) != true){
+        res.json({ msg: "含非法字符！" });
+        return;
+    }
+    var _where = {};
+    core.confirmEmail(name) == true ? _where.email = name : _where.name = name;
 
     //验证token的用户信息
     var payload,created;
-    user.userget(json, "id,name,password").then(function (row) {
-        // usually this would be a database call:
-        // var theuser = row.find(age => age.name === name);
-        var theuser = row[0];
-        if(theuser.length==0){
-            return "没有此用户！";
+    var theuser;
+    user.sql.findOne({
+		where: _where,
+		raw: true,
+		attributes: ['id', 'name', ['password','key'], 'email', 'role', 'dip']
+	}).then(function (result) {
+        theuser = result;
+        if(!theuser){
+            return {err: "没有此用户！"};
         }
 
         // Hmac加密
@@ -52,22 +59,26 @@ router.post('/', apiLimiter, function (req, res, next) {
         hash.update(password)
         var miwen = hash.digest('hex')
 
-
-        if (theuser.password === miwen) {
-            payload = { id: theuser.id };
+        if (theuser.key === miwen) {
+            payload = { id: theuser.id, key: theuser.key.substr(0,6), ip: req.ip };
             created = Math.floor(Date.now() / 1000);
-            return user.useredit({ id: theuser.id, data: { dtime: created } })
+            return user.sql.update({ dip: req.ip, dtime: created }, {
+                fields: ['dip','dtime'], //允许更新字段
+                where: {
+                    id: theuser.id
+                }
+            })
         } else {
-            return "密码错误！";
+            return {err: "密码错误！"};
             // res.status(401).json({ msg: "密码错误！" });
-            // res.redirect('/error');
         }
-    }).then(function(err){
-        if (!err) {
-            var token = pass.createToken(payload, created);
-            res.json({ state: true, msg: "登录成功", token: token });
+    }).then(function(result){
+        if (result && result.err) {
+            res.json({ state: false, msg: result.err||"登录失败！" });
         } else {
-            res.json({ state: false, msg: err||"登录失败！" });
+            var token = pass.createToken(payload, created);
+            delete theuser.key;
+            res.json({ state: true, msg: "登录信息", token: token, user: theuser });
         }
     })
 });
@@ -75,41 +86,52 @@ router.post('/', apiLimiter, function (req, res, next) {
 
 //===============================================用户注册START
 
-function usercheck(obj, res) {
+function usercheck(obj) {
     return new Promise(function (resolve, reject) {
         if (!obj.name || !obj.password || !obj.email) {
-            res.json({ msg: "请正确填写注册信息！" });
+            reject({ err: "请正确填写注册信息！" });
+            return;
+        }
+        if(core.sqlstring(name) != true){
+            res.json({ msg: "含非法字符！" });
             return;
         }
         if (obj.password.length < 6) {
-            res.json({ msg: "密码需至少6位！" });
+            reject({ err: "密码需至少6位！" });
             return;
         }
         //验证用户名及邮箱合法性
         var regName = core.confirmName(obj.name);
         var regEmail = core.confirmEmail(obj.email);
-        if (regName) {
-            res.json({ msg: regName });
+        if (regName != true) {
+            reject({ err: regName });
             return;
         }
-        if (regEmail) {
-            res.json({ msg: regEmail });
+        if (regEmail != true) {
+            reject({ err: regEmail });
             return;
         }
         //检查账户
-        user.userget({ name: [obj.name], email: [obj.email] }, "id,name,email").then(function (row) {
-            // usually this would be a database call:
-            if (row[0] && row[0].name == obj.name) {
-                res.json({ msg: "已有此用户名！" });
-                return;
-            }
-            if (row[0] && row[0].email == obj.email) {
-                res.json({ msg: "此邮箱已注册！" });
-                return;
-            }
+		user.sql.findOne({
+			where: {
+				[user.Op.or]: [
+					{ name: obj.name || '00' },
+					{ email: obj.email || '00' }
+				]
+			},
+			raw: true,
+			attributes: ['id', 'name', 'email']
+		}).then(function (result) {
+			if (result && result.name == obj.name) {
+				reject({ err: "已有此用户名！" });
+				return;
+			}
+			if (result && result.email == obj.email) {
+				reject({ err: "此邮箱已注册！" });
+				return;
+			}
 
             resolve();
-
 
         })
     })
@@ -119,7 +141,7 @@ function usercheck(obj, res) {
 const createAccountLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1小时后开放
     max: 20, // 限制20次请求
-    message: "您的请求注册次数过多！",
+    message: "您的注册请求次数过多！",
     onLimitReached: function (req, res, options) {
         res.json({ msg: options.message });
     }
@@ -133,9 +155,11 @@ router.post('/register', createAccountLimiter, function (req, res, next) {
     var password = req.body.password.trim();
     var email = req.body.email.trim();
 
-    usercheck({ name: name, password: password, email: email }, res).then(function () {
+    usercheck({ name: name, password: password, email: email }).then(function () {
         req.session.register_name = name;
         res.redirect(307, "useradd");
+    }).catch(function (params) {
+        res.json({ msg: params.err });
     })
 
 })
@@ -162,14 +186,13 @@ router.post('/useradd', limiter, function (req, res, next) {
         hash.update(password)
         var miwen = hash.digest('hex')
         //新增账户
-        return user.useradd([name, email, miwen]).then(function (err) {
-            if (!err) {
-                res.json({ state: true, msg: "注册成功" });
-            } else {
-                res.json({ msg: "注册失败！" });
-            }
+        return user.sql.create({
+			name: name,
+			email: email,
+			password: miwen
+		}).then(function () {
+            res.json({ state: true, msg: "注册成功" });
         })
-
     }else{
         res.json({ msg: "非法进入！" });
     }
@@ -187,28 +210,45 @@ const mailLimiter = rateLimit({
 router.post('/repass', mailLimiter, function (req, res, next) {
     var email = req.body.email.trim();
     var regEmail = core.confirmEmail(email);
-    if (regEmail) {
+    if (regEmail != true) {
         res.json({ msg: regEmail });
         return;
     }
 
     //检查账户
     var verify, userid;
-    user.userget({ email: [email] }, "id,name,email").then(function (row) {
-        if (!row[0] || !row[0].email || row[0].email != email) {
-            res.json({ msg: "此邮箱未注册！" });
-            return;
+
+    user.sql.findOne({
+        where: {
+            email: email
+        },
+        raw: true,
+        attributes: ['id', 'name', 'email', 'password']
+    }).then(function (result) {
+        if (!result) {
+            return { err: "此邮箱未注册！" };
         }
-        userid = row[0].id;
+        userid = result.id;
         verify = core.randomString(6);//生成随机码
+        if(result.password == 'pass'){
+            return { msg: "简单重置" };
+        }
         //发送邮件
         return toemail.sendmail({
             subject: 'flashme.cn 密码找回验证', to: '"用户1" <' + email + '>',
             html: '<div style="width: 300px;margin: 20px auto;line-height: 1.7;background: #eee;text-align: center;"><h3>验证码</h3><h2>' + verify + '</h2><h4>此邮件来自：<a href="http://www.flashme.cn">flashme.cn</a></h4></div>'
         })
 
-    }).then(function () {
+    }).then(function (result) {
+        if(result && result.err){
+            res.json({ msg: result.err });
+            return;
+        }
         req.session.verify = {code:verify, email:email, id:userid}
+        if(result && result.msg=="简单重置"){
+            res.json({ state: true, msg: verify });
+            return;
+        }
         res.json({ state: true, msg: "发送成功" });
     }, function (err) {
         res.json({ state: false, msg: "发送失败！" + err });
@@ -240,15 +280,16 @@ router.post('/repassword', mailLimiter2, function (req, res, next) {
     hash.update(password)
     var miwen = hash.digest('hex')
 
-    var updata = { id: req.session.verify.id, data: { password: miwen } }
-    user.useredit(updata).then(function (err) {
-        if (!err) {
-            delete req.session.verify;
-            res.json({ state: true, msg: "修改成功" });
-        } else {
-            delete req.session.verify;
-            res.json({ state: false, msg: "修改失败！" });
+    user.sql.update({ password: miwen }, {
+        where: {
+            id: req.session.verify.id
         }
+    }).then(function (result) {
+        delete req.session.verify;
+        res.json({ state: true, msg: "修改成功" });
+    }).catch(function (err) {
+        delete req.session.verify;
+        res.json({ state: false, msg: "修改失败！" });
     })
 })
 

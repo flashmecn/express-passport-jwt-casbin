@@ -8,7 +8,7 @@ var crypto = require('crypto');
 //用户权限模块
 const casbin = require('casbin');
 const authz = require('casbin-express-authz');
-const enforcer = casbin.newEnforcer(path.join(__dirname, '../data/authz_model.conf'), path.join(__dirname, '../data/authz_policy.csv'));
+const enforcer = casbin.newEnforcer('./data/authz_model.conf', './data/authz_policy.csv');
 
 var pass = require('../common/passport');
 var core = require('../common/core');
@@ -28,8 +28,13 @@ router.get('/edit', function (req, res, next) {
 //=================================登录判断，给下面权限模块判断 res.locals.username
 //*
 router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedirect: '/error/auth' }), (req, res, next) => {
-    res.locals.username = req.user.role;//获取角色
-    next();
+    return core.awaiter(this, void 0, void 0, function* () {
+		var e = yield enforcer;
+		yield e.loadPolicy();
+		res.locals.username = req.user.role;//获取角色
+		// var token = pass.getToken(req.get('Authorization'));//解析用户token内的信息
+		next();
+	})
 });
 
 //=================================拉取权限表
@@ -37,10 +42,10 @@ router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedir
 router.get('/p', function (req, res, next) {
     return core.awaiter(this, void 0, void 0, function* () {
         var e = yield enforcer;
-        if (global.policystate) {//当有变动时重新读取
-            yield e.loadPolicy();
-            global.policystate = false;
-        }
+        // if (global.policystate) {//当有变动时重新读取
+        //     yield e.loadPolicy();
+        //     global.policystate = false;
+        // }
         var route = req.query.route;
         var subject;
         e.getAllSubjects().then(function (row) {
@@ -59,11 +64,25 @@ router.get('/p', function (req, res, next) {
 //=================================拉取数据列表（查）
 
 router.get('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, next) {
-    var size = req.query.size.trim();
-    var page = req.query.page.trim();
-    api.apilist({ size: size, num: page }).then(function (rows) {
-        res.json({ state: true, msg: "列出数据", length: rows.length, rows: rows.rows, user: req.user });
-    })
+    var size = req.query.size;
+    var page = req.query.page;
+    var line = (size < 101 ? size : 100) * (page - 1);
+    //获取列表并分页 Limit:读取条数 Offset:跳过条数
+    api.sql.findAndCountAll({
+        where: {
+        },
+        limit: size,
+        offset: line,
+        raw: true,
+    }).then(function (result) {
+        // success
+        result.state = true;
+        result.msg = "列出API";
+        // result.user = req.user;
+        res.json(result)
+    }).catch(function (error) {
+        res.json({ msg: '读取失败！' })
+    });
 });
 
 //================================删除数据（删）
@@ -76,6 +95,7 @@ router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, re
             res.json({ msg: "未获得删除项！" });
             return;
         }
+        id = id instanceof Array ? id : [id];
         var e = yield enforcer;
         if (apiroute instanceof Array) {
             for (var k in apiroute) {
@@ -86,14 +106,17 @@ router.delete('/data', authz.authz({ newEnforcer: enforcer }), function (req, re
         }
 
         yield e.savePolicy();//保存新规则
-        global.policystate=true;
-        api.apidel(typeof(id)=='string'?id.split(','):id).then(function (err) {
-            if (!err) {
-                res.json({ state: true, msg: "删除成功" });
-                // pass.resetUser();
-            } else {
-                res.json({ msg: "删除失败！" });
+        global.policystate = true;
+        api.sql.destroy({
+            where: {
+                id: {
+                    [api.Op.in]: id
+                }
             }
+        }).then(function (result) {
+            res.json({ state: true, msg: "删除成功 " + result + "项" });
+        }).catch(function (error) {
+            res.json({ msg: "删除失败！" });
         })
     })
 })
@@ -112,19 +135,26 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
     var body = req.body;
     editPolicy(body, newroute);
     //检查
-    api.apiget({ route: [newroute] }).then(function (row) {
-        if (row[0] && row[0].route == newroute) {
-            res.json({ msg: "已有此API！" });
-            return;
+    api.sql.findOne({
+        where: {
+            route: newroute
+        },
+        raw: true
+    }).then(function (result) {
+        if (result && result.route == newroute) {
+            return { err: "已有此API！" };
         }
         //新增
-        return api.apiadd({key:['name','route'],value:[[name, newroute]]});
+        return api.sql.create({
+            name: name,
+            route: newroute,
+        })
 
-    }).then(function (err) {
-        if (!err) {
-            res.json({ state: true, msg: "新增成功" });
+    }).then(function (result) {
+        if (result && result.err) {
+            res.json({ msg: result.err });
         } else {
-            res.json({ msg: "新增失败！" });
+            res.json({ state: true, msg: "新增成功" });
         }
     })
 })
@@ -149,14 +179,19 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
     name && (updata.data["name"] = name);
     if (newroute) {
         //检查重复API
-        api.apiget({ route: [newroute] }).then(function (row) {
-            // usually this would be a database call:
-            if (row[0] && row[0].route == newroute) {
+        api.sql.findOne({
+            where: {
+                route: newroute
+            },
+            raw: true
+        }).then(function (result) {
+            if (result && result.route == newroute) {
                 res.json({ msg: "已有此API！" });
                 return;
             }
             updata.data["route"] = newroute;
             dataedit(updata, res);
+
         })
     } else if (name) {
         dataedit(updata, res);
@@ -167,12 +202,12 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
 
 })
 function dataedit(updata, res) {
-    api.apiedit(updata).then(function (err) {
-        if (!err) {
-            res.json({ state: true, msg: "修改成功" });
-        } else {
-            res.json({ state: false, msg: "修改失败！" });
+    api.sql.update(updata.data, {
+        where: {
+            id: updata.id,
         }
+    }).then(function(result){
+        res.json({ state: true, msg: "修改成功" });
     })
 }
 
@@ -208,7 +243,7 @@ function editPolicy(body, apiroute, newroute) {
 
         // console.log(yield e.getPolicy());
         yield e.savePolicy();//保存新规则
-        global.policystate=true;
+        global.policystate = true;
         //------
     })
 }

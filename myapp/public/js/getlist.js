@@ -35,6 +35,17 @@ var getlist = function (getlisturl) {
         },
         //读取用户数据
         list: function (page, size) {
+            if(!window.localStorage.getItem('flashmeToken')){
+                layer.confirm("您还没有登陆！", {
+                    btn: ['去登录', '知道了'],
+                    title: false,
+                    shadeClose: true,
+                    closeBtn: 0,
+                }, function () {
+                    window.location.href = "/login#"+window.location.href;
+                });
+                return;
+            }
             var that = this;
             if (!startlist || !getlisturl) {
                 layer.load(1, {
@@ -76,9 +87,6 @@ var getlist = function (getlisturl) {
                         startlist = true;
                         return;
                     }
-                    $('.username').length > 0 && $('.username').text(result.user.name);
-                    $('.useremail').length > 0 && $('.useremail').text(result.user.email);
-                    $('.userrole').length > 0 && $('.userrole').text(result.user.role);
                     startlist = true;
                 },
                 error: function (err) {
@@ -96,6 +104,8 @@ var getlist = function (getlisturl) {
                             window.location.href = "/login#"+window.location.href;
                         });
                         window.localStorage.removeItem('flashmeToken');
+                    } else if (err.status == 500) {
+                        layer.msg('被禁止或已在其它设备登陆！');
                     }
                     startlist = true;
                 }

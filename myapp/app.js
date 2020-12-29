@@ -32,10 +32,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/error', require('./routes/error'));
-app.use('/users', usersRouter);
 app.use('/login', require('./routes/login'));
-app.use('/api', require('./routes/api'));
-app.use('/role', require('./routes/role'));
+app.use('/admin/users', usersRouter);
+app.use('/admin/api', require('./routes/api'));
+app.use('/admin/role', require('./routes/role'));
+app.use('/install', require('./routes/install'));
 
 
 
@@ -76,15 +77,15 @@ app.use(function (err, req, res, next) {
 
 
 
-module.exports = app;
+// module.exports = app;
 
 // 以下是开发时替代 module.exports=app
 // 全局安装 npm install nodemon -g
 // 根目录放置nodemon.json > 启动：nodemon app.js
 
-// var debug = require('debug')('my-application'); // debug模块
-// app.set('port', process.env.PORT || 3000); // 设定监听端口
-// //启动监听
-// var server = app.listen(app.get('port'), function () {
-//   debug('Express server listening on port ' + server.address().port);
-// });
+var debug = require('debug')('my-application'); // debug模块
+app.set('port', process.env.PORT || 3000); // 设定监听端口
+//启动监听
+var server = app.listen(app.get('port'), function () {
+  debug('Express server listening on port ' + server.address().port);
+});

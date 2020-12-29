@@ -114,7 +114,8 @@
                 success: function (result) {
                     console.log("login -> result", result)
                     if (result.state) {
-                        window.localStorage.setItem('flashmeToken', result.token);console.log(window.location.hash);
+                        window.localStorage.setItem('flashmeToken', result.token);
+                        window.localStorage.setItem('flashmeUser', JSON.stringify(result.user));
                         window.location.href = window.location.hash.slice(1) || "/";
                     } else {
                         layer.alert(result.msg)

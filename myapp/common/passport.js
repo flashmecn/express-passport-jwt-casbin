@@ -2,7 +2,7 @@ const secret = "www.flashme.cn.20200519";//用于token加密加盐
 
 var user = require('../common/user');
 
-var base64url = require("base64url");
+// var base64url = require("base64url");
 var passport = require("passport");
 var passportJWT = require("passport-jwt");
 
@@ -17,16 +17,21 @@ function startjwt() {
     jwtOptions.secretOrKey = secret;
     var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, done) {
         // usually this would be a database call:
-        user.userget({id:[jwt_payload.id]}, "id,name,email,role,level,dtime").then(function (row) {
-            var user = row.find(user => user.id === jwt_payload.id);
-            // 必须启用状态 & 只允许最后登录用户
-            if (row && row.level != 0 && (jwt_payload.auto == true || jwt_payload.iat == user.dtime)) {
-                done(null, user);
+        user.sql.findOne({
+            where: { id: jwt_payload.id },
+            raw: true,
+            attributes: ['id', 'name', ['password','key'], 'email', 'role', 'level', 'dip', 'dtime']
+        }).then(function (row) {
+            // var user = row.find(user => user.id === jwt_payload.id);
+            // 必须启用状态 & 密码头一致性 & 登陆IP一致性 & 只允许最后登录用户或续签密码
+            row.key = row.key.substr(0,6);
+            if (row && row.level != 0 && jwt_payload.key == row.key && jwt_payload.ip == row.dip && (jwt_payload.iat == row.dtime || jwt_payload.auto == true)) {
+                done(null, row);
             } else {
                 done(null, false);
             }
         })
-    
+
     });
     passport.use(strategy);
 
@@ -47,7 +52,7 @@ function createToken(payload, now) {
 //     return new Promise((resolve, reject) => {
 //         jwt.verify(token, secret, err => {
 //             if (!err) {
-//                 resolve(res)
+//                 resolve()
 //             } else {
 //                 reject("token验证失败");
 //             }
@@ -56,24 +61,23 @@ function createToken(payload, now) {
 // }
 
 
-
 //解析token
-function getToken(token) {
-    // let token = localStorage.getJson('token');
-    if (!token) {
-        return undefined;
-    }
+// function getToken(token) {
+//     // let token = localStorage.getJson('token');
+//     if (!token) {
+//         return undefined;
+//     }
 
-    let parts = token.split('.');
-    if (parts.length !== 3) {
-        return undefined;
-    }
+//     let parts = token.split('.');
+//     if (parts.length !== 3) {
+//         return undefined;
+//     }
 
-    let payload = parts[1];
-    return JSON.parse(base64url.decode(payload));
-}
+//     let payload = parts[1];
+//     return JSON.parse(base64url.decode(payload));
+// }
 
 
 module.exports = {
-    passport, secret, createToken, startjwt, getToken, jwt
+    passport, secret, createToken, startjwt, jwt
 }

@@ -18,7 +18,7 @@ exports.confirmName = function (value) {
   } else if (reg2.test(value)) {
     return "名称起始不允许数字及符号";
   } else {
-    return false;
+    return true;
   }
 
 }
@@ -28,9 +28,20 @@ exports.confirmEmail = function (value) {
   if (!reg.test(value)) {
     return "邮箱格式不正确!";
   } else {
-    return false;
+    return true;
   }
 
+}
+//过滤非法字符
+exports.sqlstring = function (value) {
+  var str=['"',"'","and","or","exec","insert","select","delete","update","count","chr","mid","master","truncate","char","declare","*","%",";","-","+",","];
+  for (const k in str) {
+    if(value.indexOf(str[k]) != -1){
+      return "含非法字符!";
+    } else {
+      return true;
+    }
+  }
 }
 
 //随机字符串
@@ -43,6 +54,26 @@ exports.randomString = function (len) {
     pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
   }
   return pwd;
+}
+
+// 时间转换例子：
+// Format("YYYY-MM-DD hh:mm:ss.S") ==> 2006-07-02 08:09:04.423
+// Format("YYYY-M-D h:m:s.S")      ==> 2006-7-2 8:9:4.18
+exports.dateFormat = function (fmt, _time) {
+  var time = _time ? new Date(_time) : new Date();
+  var o = {
+      "M+": time.getMonth() + 1, //月
+      "D+": time.getDate(), //日
+      "h+": time.getHours(), //时
+      "m+": time.getMinutes(), //分
+      "s+": time.getSeconds(), //秒
+      "q+": Math.floor((time.getMonth() + 3) / 3), //季度
+      "S": time.getMilliseconds() //毫秒
+  };
+  if (/(Y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (time.getFullYear() + "").substr(4 - RegExp.$1.length));
+  for (var k in o)
+  if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+  return fmt;
 }
 
 

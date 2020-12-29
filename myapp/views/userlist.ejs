@@ -24,7 +24,7 @@
                 <div class="data_table">
                     <table>
                         <thead>
-                            <tr><th>用户名</th><th>角色</th><th>邮箱</th><th>注册时间</th><th>状态</th><th>操作</th></tr>
+                            <tr><th>用户名</th><th>角色</th><th>邮箱</th><th>注册时间</th><th>最后登陆</th><th>状态</th><th>操作</th></tr>
                         </thead>
                         <tbody class="listdata"></tbody>
                     </table>
@@ -49,7 +49,8 @@
             <td class="name"><input name="id" type="checkbox" value="{{$value.id}}"> {{$value.name}}</td>
             <td class="role">{{$value.role}}</td>
             <td class="email">{{$value.email}}</td>
-            <td>{{$value.time}}</td>
+            <td>{{resetnow($value.created)}}</td>
+            <td>{{if $value.dtime}}{{resetnow($value.dtime*1000)}}{{/if}}</td>
             <td>{{if $value.level==0}}<font color=red>禁用</font>{{else}}启用{{/if}}<input name="level" type="hidden" value="{{$value.level}}"></td>
             <td><a href="javascript:void(0)" onclick="editbtn(this)">修改</a></td>
         </tr>
@@ -61,9 +62,11 @@
     <script>
 
         //获取列表数据
-        var listdata=new getlist("/users/data");
+        var listdata=new getlist("/admin/users/data");
         listdata.init();
         listdata.list();
+
+        template.defaults.imports.resetnow = resetnow;
 
 
         //退出登录(删除token)
@@ -100,7 +103,7 @@
 
                 $.ajax({
                     type: "delete",
-                    url: "/users/data",
+                    url: "/admin/users/data",
                     data: $('#form1').serialize(),
                     headers: {
                         Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
@@ -136,7 +139,7 @@
                 fixed: false, //不固定
                 maxmin: true,
                 shadeClose: true,
-                content: '/users/edit#edit'
+                content: '/admin/users/edit#edit'
             });
             //可以执行iframe里的函数
             // var iframe=document.getElementById("layui-layer-iframe"+layerindex)
@@ -149,6 +152,7 @@
 
 
     </script>
+    <%include footer.ejs%>
 </body>
 
 </html>

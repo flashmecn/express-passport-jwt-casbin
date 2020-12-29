@@ -7,9 +7,9 @@
         </ul>
         <ul id="menu" class="justify">
             <li class="active"><a href="/">首页</a></li>
-            <li id="menu_user"><a href="/users">用户管理</a></li>
-            <li id="menu_api"><a href="/api">API权限</a></li>
-            <li id="menu_role"><a href="/role">角色分配</a></li>
+            <li id="menu_user"><a href="/admin/users">用户管理</a></li>
+            <li id="menu_api"><a href="/admin/api">API权限</a></li>
+            <li id="menu_role"><a href="/admin/role">角色分配</a></li>
         </ul>
     </div>
 </div>
@@ -18,11 +18,13 @@
     //退出登录(删除token)
     function userout() {
         window.localStorage.removeItem('flashmeToken');
+        window.localStorage.removeItem('flashmeUser');
         window.location.reload();
     }
     var menuactive = "#<%= menuactive %>";
     if ($(menuactive).length > 0) {
         $(menuactive).addClass('active').siblings().removeClass('active')
     }
+
 
 </script>

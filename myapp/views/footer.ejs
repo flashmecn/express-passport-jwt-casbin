@@ -1,0 +1,8 @@
+<script>
+    var flashmeUser = JSON.parse(window.localStorage.getItem('flashmeUser'));
+    if (flashmeUser) {
+        $('.username').length > 0 && $('.username').text(flashmeUser.name);
+        $('.useremail').length > 0 && $('.useremail').text(flashmeUser.email);
+        $('.userrole').length > 0 && $('.userrole').text(flashmeUser.role);
+    }
+</script>

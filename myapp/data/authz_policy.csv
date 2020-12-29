@@ -1,17 +1,6 @@
-p, notdel, /api/data*, GET
-p, notdel, /role/data*, GET
-p, notdel, /role/data*, PUT
-p, setuser, /role/data*, GET
-p, notdel, /users/data*, GET
-p, notdel, /users/data*, POST
-p, notdel, /users/data*, PUT
-p, setuser, /users/data*, *
-p, onlyadd, /users/data*, POST
-p, guest, /users/data*, GET
-g, high, notdel
-g, 管理用户, setuser
-g, test, setuser
-g, 测试1, notdel
-g, low, guest
-g, normal, onlyadd
-g, normal, guest
+p, user, /users/data*, *
+p, 只看, /users/data*, GET
+p, user, /role/data*, GET
+p, user, /role/data*, POST
+p, user, /role/data*, PUT
+p, 只看, /role/data*, GET

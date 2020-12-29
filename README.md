@@ -26,12 +26,17 @@ http://localhost:3000/
 
 密码找回：nodemailer + express-session
 
+数据库操作：sequelize（方便更换其它类型数据库）
+
 > 以上模块均可npm下载，使用方法可自行查阅
 
 ## 学习曲线：
-Express的基础使用 > ejs后端渲染框架（也可选用其它的） > passport-jwt登录验证 > 访问限制express-rate-limit > sqlite3数据库api > casbin（RBAC角色权限） > sequelize（数据库ORM 研究中...）
+Express的基础使用 > ejs后端渲染框架（也可选用其它的） > passport-jwt登录验证 > 访问限制express-rate-limit > sqlite3数据库api > casbin（RBAC角色权限） > sequelize（数据库ORM）
 
-权限模块的权限配置文件在 data/authz_policy.csv
+重置网站：
+删除数据库 data/flashme-data.db
+清空权限文件 data/authz_policy.csv
+重新安装 http://localhost:3000/install
 
 权限模块文档：
 
@@ -39,4 +44,6 @@ Express的基础使用 > ejs后端渲染框架（也可选用其它的） > pass
 
 [www.kancloud.cn/oldlei/casbin(不全)](http://www.kancloud.cn/oldlei/casbin "www.kancloud.cn/oldlei/casbin(不全)")
 
-前端仅使用了jquery.js/ 模板引擎art-template/ 弹窗layer.js （算是用较少引入实现更多前端功能）
+前端仅使用了jquery.js/ 模板引擎art-template/ 弹窗layer.js/ 树菜单melist.js （精简的前端功能）
+
+## Express告一段落，下一步学学 koa

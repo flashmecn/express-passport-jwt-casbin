@@ -9,8 +9,8 @@ router.get('/', function (req, res, next) {
 });
 router.get('/auth', function (req, res, next) {
     // var msg=req.query.msg;
-    let rawToken = req.headers.authorization
-    if (!rawToken.split(' ').length) {
+    let rawToken = req.headers.authorization;
+    if (!rawToken || rawToken.split(' ').length<2 || rawToken.split(' ')[1]=='null') {
         res.statusCode = 403
         res.json({ code: 403, msg: 'error for get token !' })
     } else {
@@ -23,7 +23,7 @@ router.get('/auth', function (req, res, next) {
                     let payload = pass.jwt.decode(token);
                     //逾期1小时内自动续签token
                     if ((Math.floor(Date.now() / 1000) - payload.exp) < 60 * 60) {
-                        token = pass.createToken({ id: payload.id, auto: true })
+                        token = pass.createToken({ id: payload.id, auto: true, key: payload.key })
                         res.statusCode = 200;
                         res.setHeader('Content-Type', 'application/json')
                         res.json({ state: true, token: token, msg: '刷新token' })

@@ -17,61 +17,61 @@ function Router() {
     this.currentUrl = '';
     this.beforeUrl = '';
 }
-Router.prototype.route = function(path, callback, removeback) {
-	var obj={start:false,subset:[]};
-	obj.callback=callback || function(){};
-    if(removeback) obj.leave = removeback;
+Router.prototype.route = function (path, callback, removeback) {
+    var obj = { start: false, subset: [] };
+    obj.callback = callback || function () { };
+    if (removeback) obj.leave = removeback;
     this.routes[path] = obj;
 };
-Router.prototype.refresh = function(ev) {
+Router.prototype.refresh = function (ev) {
     this.routes["hash"] && this.routes["hash"]();
 
     this.currentUrl = location.hash.slice(1) || '/';
-    if(this.routes[this.currentUrl] && this.routes[this.currentUrl].start == false){
+    if (this.routes[this.currentUrl] && this.routes[this.currentUrl].start == false) {
         this.routes[this.currentUrl].callback();
-		this.routes[this.currentUrl].start = true;
-		this.routes[this.currentUrl].before = this.beforeUrl;//记录上一个地址
-	}
+        this.routes[this.currentUrl].start = true;
+        this.routes[this.currentUrl].before = this.beforeUrl;//记录上一个地址
+    }
     //将之前的地址判断是否执行退出
-	this.parentUrl(this.beforeUrl);
+    this.parentUrl(this.beforeUrl);
 
     //判断全部地址是否执行退出
-    for(var k in this.routes){
-    	var than=this.routes[k];
-    	if(than.start && this.currentUrl!=k){
-			//处在打开状态 & 当前地址不等于此地址
-    		if(!this.forsub(than)){
-    			than.start = false;
-    			than.leave && than.leave();
-    		}
+    for (var k in this.routes) {
+        var than = this.routes[k];
+        if (than.start && this.currentUrl != k) {
+            //处在打开状态 & 当前地址不等于此地址
+            if (!this.forsub(than)) {
+                than.start = false;
+                than.leave && than.leave();
+            }
 
-    	}
+        }
     }
-    this.beforeUrl=this.currentUrl;
-    
+    this.beforeUrl = this.currentUrl;
+
 };
-Router.prototype.forsub = function(than){
-	//for 子地址非打开状态  >> 执行退出函数
-	for(var i in than.subset){//判断子集是否打开状态
-		if(this.routes[than.subset[i]].start){
-			return true;
-		}
-	}
-	return false;
+Router.prototype.forsub = function (than) {
+    //for 子地址非打开状态  >> 执行退出函数
+    for (var i in than.subset) {//判断子集是否打开状态
+        if (this.routes[than.subset[i]].start) {
+            return true;
+        }
+    }
+    return false;
 }
 Router.prototype.parentUrl = function (before) {
-	if (before && this.currentUrl!=before && this.routes[before] && this.routes[before].start && !this.forsub(this.routes[before])) {
-		this.routes[before].start = false;
-		this.routes[before].leave && this.routes[before].leave();
-		var parent = this.routes[before].before;
-		if (parent) {
-			this.routes[before].before = null;
-			this.parentUrl(parent);
-		}
-	}
+    if (before && this.currentUrl != before && this.routes[before] && this.routes[before].start && !this.forsub(this.routes[before])) {
+        this.routes[before].start = false;
+        this.routes[before].leave && this.routes[before].leave();
+        var parent = this.routes[before].before;
+        if (parent) {
+            this.routes[before].before = null;
+            this.parentUrl(parent);
+        }
+    }
 
 }
-Router.prototype.init = function() {
+Router.prototype.init = function () {
     window.addEventListener('load', this.refresh.bind(this), false);
     window.addEventListener('hashchange', this.refresh.bind(this), false);
 }
@@ -93,7 +93,7 @@ Router.prototype.init = function() {
 var watchdata = function () {
     //缓存
     let watchscope = {};
-    let domeve=false;
+    let domeve = false;
     //绑定变量
     return {
         setwatch: function (obj) {
@@ -144,20 +144,20 @@ var watchdata = function () {
             }
         },
         domevent: function () {
-            domeve=true;
+            domeve = true;
             //绑定DOM的修改关联
             document.addEventListener('DOMCharacterDataModified', this.element, false);
-            document.addEventListener('DOMNodeInserted', this.element, false); 
+            document.addEventListener('DOMNodeInserted', this.element, false);
         },
         inputevent: function () {
             //绑定input表单的修改关联
-            var input=document.querySelectorAll("input[ng-bind]")
-            for(var k in input){
+            var input = document.querySelectorAll("input[ng-bind]")
+            for (var k in input) {
                 input[k].oninput = function (e) {
                     watchscope[e.target.attributes["ng-bind"].nodeValue] = e.target.value;
                 }
             }
-                
+
         }
     }
 
@@ -167,62 +167,62 @@ var watchdata = function () {
 
 //============================至底加载
 
-function loading(target,fun){
-    var thisswitch=true;
-    var loadico='<div class="loaderCircle"><div class="icono-spinner spin step"></div></div>';
+function loading(target, fun) {
+    var thisswitch = true;
+    var loadico = '<div class="loaderCircle"><div class="icono-spinner spin step"></div></div>';
     target.bind('scroll', function onScroll() {
-        if(!thisswitch){
+        if (!thisswitch) {
             return;
         }
         var toBottom = ($(this)[0].scrollTop + $(this).height() > $(this)[0].scrollHeight - 80);
-        if(toBottom&&$(this).attr('loading')!='show') {
-            $(this).attr('loading','show');
+        if (toBottom && $(this).attr('loading') != 'show') {
+            $(this).attr('loading', 'show');
             $(this).append(loadico);
             fun && fun();
         }
     });
     return {
-        loadComplete:function(){
-            target.attr('loading','hide');
+        loadComplete: function () {
+            target.attr('loading', 'hide');
             target.children('div.loaderCircle').remove();
         },
-        switch:function (bol) {
-            thisswitch=bol;
+        switch: function (bol) {
+            thisswitch = bol;
         }
     }
 }
 //回到顶部
 function backtop($con) {
-    var appTop = $con.height()*1.2 || $(window).height()*1.2;
+    var appTop = $con.height() * 1.2 || $(window).height() * 1.2;
     var scrTop;
-    var backbtn=$con.siblings(".backtop");
-    $con.scroll(function(e){
+    var backbtn = $con.siblings(".backtop");
+    $con.scroll(function (e) {
         scrTop = $con.scrollTop();
-        if(scrTop > appTop){
+        if (scrTop > appTop) {
             backbtn.show();
-        }else{
+        } else {
             backbtn.hide();
         }
     })
 
-    backbtn.click(function(){
-        $con.animate({scrollTop: 0}, 400);
+    backbtn.click(function () {
+        $con.animate({ scrollTop: 0 }, 400);
     })
 }
 
 //==========================================Tab按钮
-function tabbox(tabtit,tab_conbox,mouseEvent) {
-	$(tab_conbox).children().hide();
-	$(tabtit).children("label,.label").first().addClass("active");
-	$(tab_conbox).children().first().show();
+function tabbox(tabtit, tab_conbox, mouseEvent) {
+    $(tab_conbox).children().hide();
+    $(tabtit).children("label,.label").first().addClass("active");
+    $(tab_conbox).children().first().show();
 
-	$(tabtit).children("label,.label").bind(mouseEvent,function(){
-		$(this).addClass("active").siblings("label,.label").removeClass("active");
-		var activeindex = $(tabtit).children("label,.label").index(this);
-		$(tab_conbox).children().eq(activeindex).show().siblings().hide();
+    $(tabtit).children("label,.label").bind(mouseEvent, function () {
+        $(this).addClass("active").siblings("label,.label").removeClass("active");
+        var activeindex = $(tabtit).children("label,.label").index(this);
+        $(tab_conbox).children().eq(activeindex).show().siblings().hide();
 
-		return false;
-	});
+        return false;
+    });
 
 };
 
@@ -232,10 +232,10 @@ function postObj(params) {
     for (x in params) {
         if (!values[params[x].name]) {
             values[params[x].name] = params[x].value;
-        }else if(values[params[x].name] instanceof Array==false){
-            values[params[x].name]=[values[params[x].name]];
+        } else if (values[params[x].name] instanceof Array == false) {
+            values[params[x].name] = [values[params[x].name]];
             values[params[x].name].push(params[x].value);
-        }else{
+        } else {
             values[params[x].name].push(params[x].value);
         }
 
@@ -243,28 +243,67 @@ function postObj(params) {
     return values;
 }
 
-
+//日期兼容设置 针对格式 2020-12-1 14:49:00 +00:00
+function getFormatTime(newtime) {
+    var fmtArr = String(newtime).split(' ');
+    var rq = fmtArr[0].replace(/-/g, "/");
+    var sj = String(fmtArr[1]).split('.')[0];
+    var hm = Number(String(fmtArr[1]).split('.')[1]);
+    //var sq = fmtArr[2] ? String(fmtArr[2]).match(/[^\+|^\-]+(?=\:)/) : 0;
+    //sq = sq ? (Number(sq[0]) * 60 * 60 * 1000) : 0;
+    //计算时区差额
+    var sq = fmtArr[2] ? (new Date(rq + ' ' + fmtArr[2].substr(1))).getTime() - (new Date(rq)).getTime() : 0;
+    var _time = (new Date(rq + ' ' + sj)).getTime() + hm;
+    var zz = (new Date()).getTimezoneOffset() * 60 * 1000;
+    return (fmtArr[2] && String(fmtArr[2]).substr(0, 1) == '+') ? _time - sq - zz : _time + sq - zz;
+}
 
 // 对Date的扩展，将 Date 转化为指定格式的String
-// 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
-// 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+// 月(M)、日(D)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
+// 年(Y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
 // 例子：
-// (new Date()).Format("yyyy-MM-dd HH:mm:ss.S") ==> 2006-07-02 08:09:04.423
-// (new Date()).Format("yyyy-M-d H:m:s.S")      ==> 2006-7-2 8:9:4.18
-Date.prototype.Format = function (fmt) {
+// (new Date()).Format("YYYY-MM-DD hh:mm:ss.S") ==> 2006-07-02 08:09:04.423
+// (new Date()).Format("YYYY-M-D h:m:s.S")      ==> 2006-7-2 8:9:4.18
+Date.prototype.Format = function (fmt, newtime) {
+    var thistime = this;
+    //兼容设置
+    if (!thistime.getFullYear() && newtime) {
+        thistime = new Date(getFormatTime(newtime))
+    }
+
     var o = {
-        "M+": this.getMonth() + 1, //月份 
-        "d+": this.getDate(), //日 
-        "H+": this.getHours(), //小时 
-        "m+": this.getMinutes(), //分 
-        "s+": this.getSeconds(), //秒 
-        "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
-        "S": this.getMilliseconds() //毫秒 
+        "M+": thistime.getMonth() + 1, //月
+        "D+": thistime.getDate(), //日
+        "h+": thistime.getHours(), //时
+        "m+": thistime.getMinutes(), //分
+        "s+": thistime.getSeconds(), //秒
+        "q+": Math.floor((thistime.getMonth() + 3) / 3), //季度
+        "S": thistime.getMilliseconds() //毫秒
     };
-    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    if (/(Y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (thistime.getFullYear() + "").substr(4 - RegExp.$1.length));
     for (var k in o)
-    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
     return fmt;
+}
+
+// 按时间当天与当年呈现时间
+function resetnow(_time) {
+    var now = new Date();
+    var time = new Date(_time);
+    if (!time.getFullYear()) {
+        time = new Date(getFormatTime(_time))
+    }
+    if (time.getFullYear() == now.getFullYear()) {
+        var c = now.getHours() * 1000 * 60 * 60 + now.getMinutes() * 1000 * 60 + now.getSeconds() * 1000;
+        var h = 1000 * 60 * 60, s = now.getTime() - time.getTime() - c;
+        if (s < 0) {
+            return '今天 ' + time.Format("hh:mm:ss", _time);
+        } else if (s < h * 24) {
+            return '昨天 ' + time.Format("hh:mm:ss", _time);
+        }
+        return time.Format("MM/DD hh:mm", _time);
+    }
+    return time.Format("YYYY/MM/DD hh:mm", _time);
 }
 
 //Table固定表头 class=heightY执行固定表头
@@ -272,29 +311,29 @@ function tablehead($target) {
     $target.each(function () {
         //复制表格做置顶表头
         var $this = $(this);
-        if($this.hasClass('heightY')){
-        	$this.find('.head').remove();
-        	var tablehead = $this.find('table').clone();
-        	tablehead.find('input,textarea,select').attr('name', '');
-        	tablehead.find('input,textarea,select').attr('id', '');
-        	tablehead.find('input.check').remove();
-        	$this.append('<div class="head"></div>');
-        	$this.find('.head').append(tablehead);
-        	$this.find('.head').height($this.find('.head thead').height());
-        	$this.scroll(function () {
-        		$this.find('.head').css('top', $this.scrollTop());
-        	})
+        if ($this.hasClass('heightY')) {
+            $this.find('.head').remove();
+            var tablehead = $this.find('table').clone();
+            tablehead.find('input,textarea,select').attr('name', '');
+            tablehead.find('input,textarea,select').attr('id', '');
+            tablehead.find('input.check').remove();
+            $this.append('<div class="head"></div>');
+            $this.find('.head').append(tablehead);
+            $this.find('.head').height($this.find('.head thead').height());
+            $this.scroll(function () {
+                $this.find('.head').css('top', $this.scrollTop());
+            })
         }
-        
+
         //全选按钮
         $this.find('.check-all').click(function () {
             $this.find('tbody input[type=checkbox].check').prop('checked', $(this).prop('checked'));
         })
-        $this.on('click', 'input[type=checkbox].check', function(event) {
-            if($this.find('input[type=checkbox].check:checked').length==$this.find('input[type=checkbox].check').length){
-            	$this.find('.check-all').prop('checked',true);
-            }else{
-            	$this.find('.check-all').prop('checked',false);
+        $this.on('click', 'input[type=checkbox].check', function (event) {
+            if ($this.find('input[type=checkbox].check:checked').length == $this.find('input[type=checkbox].check').length) {
+                $this.find('.check-all').prop('checked', true);
+            } else {
+                $this.find('.check-all').prop('checked', false);
             }
         });
     })

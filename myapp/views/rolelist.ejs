@@ -37,7 +37,7 @@
                     <div class="more">更多</div>
                 </div>
             </span>
-            <button onclick="upLevel()">确定</button><i style="font-size: 10px;">子集也会随之迁移</i>
+            <button onclick="upLevel()">确定</button><i>子集也会随之迁移</i>
             <hr>
         </div>
         <p>my web: <a href="http://www.flashme.cn" target="_blank">www.flashme.cn</a></p>
@@ -87,7 +87,7 @@
 
                 $.ajax({
                     type: "delete",
-                    url: "/role/data",
+                    url: "/admin/role/data",
                     data: $('#form1').serialize(),
                     headers: {
                         Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
@@ -111,14 +111,14 @@
         var editdata={}
         //新增数据
         function addbtn(ev,event,sort,role) {
-            editdata={sortpath:sort};
+            editdata={sortpath:sort,title:"新增至 "+role+" 下"};
             var layerindex=layer.open({
                 type: 2,
                 title: "新增至 "+role+" 下",
-                area: ['720px', '90%'],
+                area: ['720px', '590px'],
                 maxmin: true,
                 shadeClose: true,
-                content: '/role/edit#add'
+                content: '/admin/role/edit#add'
             });
             event.preventDefault();
             event.stopPropagation();
@@ -136,7 +136,7 @@
                 area: ['720px', '590px'],
                 maxmin: true,
                 shade: 0,
-                content: '/role/edit#edit',
+                content: '/admin/role/edit#edit',
                 zIndex: layer.zIndex,
                 success: function (layero) {
                     layer.setTop(layero);
@@ -185,22 +185,14 @@
 
             $.ajax({
                 type: "GET",
-                url: "/role/data",
+                url: "/admin/role/data",
                 headers: {
                     Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
                 },
                 success: function (result) {
                     console.log(result);
-                    if (!result.state) {
-                        layer.confirm(result.msg, {
-                            btn: ['去登录', '知道了'],
-                            title: false, //不显示标题
-                            shadeClose: true, //开启遮罩关闭
-                            closeBtn: 0, //隐藏关闭按钮
-                            // time: 2000, //2秒后自动关闭
-                        }, function () {
-                            window.location.href = "/login#" + window.location.href;
-                        });
+                    if (!result.state){
+                        layer.msg(result.msg||'Error!');
                         return;
                     }
                     treesoso.init(result.infor);
@@ -208,14 +200,20 @@
 
                     $('#linkageRole').olclear();
                     window.setLinkageAll($("#linkageRole"), result.infor);
-                    $('.username').length > 0 && $('.username').text(result.user.name);
-                    $('.useremail').length > 0 && $('.useremail').text(result.user.email);
-                    $('.userrole').length > 0 && $('.userrole').text(result.user.role);
 
                 },
                 error: function (err) {
                     if (err.status == 403) {
                         layer.msg('您无权限浏览！请联系管理员！');
+                    } else if (err.status == 401) {
+                        layer.confirm(err.responseJSON.msg, {
+                            btn: ['去登录', '知道了'],
+                            title: false,
+                            shadeClose: true,
+                            closeBtn: 0,
+                        }, function () {
+                            window.location.href = "/login#"+window.location.href;
+                        });
                     }
                 }
             })
@@ -231,7 +229,7 @@
             }
             $.ajax({
                 type: "PUT",
-                url: "/role/data",
+                url: "/admin/role/data",
                 data: {sortpath:_sortpath,sortid:_sortid},
                 dataType: 'json',
                 headers: {
@@ -247,7 +245,7 @@
 
                 },
                 error: function (err) {
-                    if (err.status == 403) {
+                    if (err.status == 403 || err.status == 401) {
                         parent.layer.msg('您无权限操作！');
                     }
                 }
@@ -257,6 +255,7 @@
 
 
     </script>
+    <%include footer.ejs%>
 </body>
 
 </html>

@@ -42,6 +42,7 @@
                     <dd>
                         <input name="oldrole" type="hidden">
                         <input name="role" type="hidden">
+                        <input name="uptime" type="hidden">
                         <span class="textroot linkage" linkage="all">
                             <ol><li><input name="zb" type="checkbox" class="" /></li></ol>
                             <div class="text">
@@ -77,7 +78,7 @@
         var posturl,msgstr,ajaxtype;
         if (location.hash == "#edit") {
             ajaxtype="put";
-            posturl="/users/data";
+            posturl="/admin/users/data";
             msgstr="修改成功";
             $("input[name=oldrole]").val(parent.editdata.role);
             $('input[name=id]').val(parent.editdata.id);
@@ -90,12 +91,13 @@
             }
         }else if (location.hash == "#add"){
             ajaxtype="post";
-            posturl="/users/data";
+            posturl="/admin/users/data";
             msgstr="添加成功";
         }
 
 
         function upData() {
+            $("input[name=uptime]").val((new Date()).Format("YYYY-MM-DD hh:mm:ss.S"));
             $.ajax({
                 type: ajaxtype,
                 url: posturl,
@@ -133,7 +135,7 @@
         var _role=parent.editdata.role;
         $.ajax({
             type: "GET",
-            url: "/role/data",
+            url: "/admin/role/data",
             headers: {
                 Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
             },

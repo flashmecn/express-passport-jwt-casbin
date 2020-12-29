@@ -8,11 +8,13 @@ var crypto = require('crypto');
 //用户权限模块
 const casbin = require('casbin');
 const authz = require('casbin-express-authz');
-const enforcer = casbin.newEnforcer(path.join(__dirname, '../data/authz_model.conf'), path.join(__dirname, '../data/authz_policy.csv'));
+const enforcer = casbin.newEnforcer( './data/authz_model.conf', './data/authz_policy.csv');
+
+const myData = require('../common/sql');
 
 var pass = require('../common/passport');
 var core = require('../common/core');
-var api = require('../common/api');
+var role = require('../common/role');
 
 //用户管理页
 router.get('/', function (req, res, next) {
@@ -27,9 +29,14 @@ router.get('/edit', function (req, res, next) {
 //*
 //=================================登录判断，给下面权限模块判断 res.locals.username
 //*
-router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedirect: '/error/auth?msg=登录过期！' }), (req, res, next) => {
-    res.locals.username = req.user.role;//获取角色
-    next();
+router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedirect: '/error/auth' }), (req, res, next) => {
+    return core.awaiter(this, void 0, void 0, function* () {
+		var e = yield enforcer;
+		yield e.loadPolicy();
+		res.locals.username = req.user.role;//获取角色
+		// var token = pass.getToken(req.get('Authorization'));//解析用户token内的信息
+		next();
+	})
 });
 
 
@@ -37,17 +44,17 @@ router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedir
 
 router.get('/g', function (req, res, next) {
     return core.awaiter(this, void 0, void 0, function* () {
-        var role = req.query.role;
+        var reqrole = req.query.role;
         var e = yield enforcer;
-        if (global.policystate) {//当API权限有变动时重新读取角色
-            yield e.loadPolicy();
-            global.policystate = false;
-        }
+        // if (global.policystate) {//当权限有变动时重新读取
+        //     yield e.loadPolicy();
+        //     global.policystate = false;
+        // }
         var subject;
         e.getAllSubjects().then(function (row) {
             subject = row;
-            if (role) {
-                return e.getRolesForUser(role.trim());
+            if (reqrole) {
+                return e.getRolesForUser(reqrole.trim());
                 // return e.getFilteredNamedGroupingPolicy('g', 0, role);
             } else {
                 return [];
@@ -63,16 +70,17 @@ router.get('/g', function (req, res, next) {
 
 router.get('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, next) {
     if (global.rolejson && global.rolejson.revised) {
-        res.json({ state: true, msg: "列出数据", infor: global.rolejson.link, user: req.user });
+        res.json({ state: true, msg: "列出数据", infor: global.rolejson.link });
     } else {
-        api.rolelist().then(function (rows) {
+        role.sql.findAll({
+            raw: true,
+        }).then(function (rows) {
             global.rolejson = { revised: false, link: [] }
-            getRoleJson(rows.reverse(), global.rolejson, '0,', { req, res })
-            // res.json({ state: true, msg: "列出数据", data: rolejson(rows, '0,'), user: req.user });
+            getRoleJson(rows.reverse(), global.rolejson, '0,', res)
         })
     }
 });
-function getRoleJson(rows, json, level, rr) {
+function getRoleJson(rows, json, level, res) {
     json.link = [];
     var len = rows.length;
     for (var i = len - 1; i >= 0; i--) {
@@ -88,15 +96,14 @@ function getRoleJson(rows, json, level, rr) {
         json.link = false;
         return;
     }
-    // console.log("getRoleJson -> rows", rows)
     if (rows.length > 0) {
+        // console.log("寻找定位 -> rows", rows)
         for (var n in json.link) {//寻找子集类目
-            // json[n].link = [];
-            getRoleJson(rows, json.link[n], json.link[n].level + json.link[n].id + ',', rr);
+            getRoleJson(rows, json.link[n], json.link[n].level + json.link[n].id + ',', res);
         }
     } else {
         global.rolejson.revised = true;
-        rr.res.json({ state: true, msg: "列出数据", infor: global.rolejson.link, user: rr.req.user });
+        res.json({ state: true, msg: "列出数据", infor: global.rolejson.link });
     }
 }
 
@@ -158,25 +165,34 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
         return;
     }
     var regName = core.confirmName(name);
-    if (name && regName) {
+    if (name && regName != true) {
         res.json({ msg: regName });
         return;
     }
     var body = req.body;
     //检查
-    api.roleget({ name: [name] }).then(function (row) {
-        if (row[0] && row[0].name == name) {
-            return "已有此角色！";
+    role.sql.findOne({
+        where: {
+            name: name
+        },
+        raw: true
+    }).then(function (result) {
+        if (result && result.name == name) {
+            return { err: "已有此角色！" };
         }
         //新增
-        return api.roleadd({ key: ['name', 'explain', 'level'], value: [[name, explain, level]] });
+        return role.sql.create({
+            name: name,
+            explain: explain,
+            level: level,
+        })
 
-    }).then(function (err) {
-        if (!err) {
+    }).then(function (result) {
+        if (result && result.err) {
+            res.json({ msg: result.err });
+        } else {
             global.rolejson = {}
             editRoles(body, res, "新增成功");
-        } else {
-            res.json({ msg: err == "已有此角色！" ? err : "新增失败！" });
         }
     })
 })
@@ -185,9 +201,9 @@ router.post('/data', authz.authz({ newEnforcer: enforcer }), function (req, res,
 //================================修改数据（改）
 
 router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, next) {
-    //等级修改：
-    var sortpath = req.body.sortpath;
-    var sortid = req.body.sortid;
+    //======等级修改：
+    var sortpath = req.body.sortpath;//新位置
+    var sortid = req.body.sortid;//角色名
     if (sortpath && sortid) {
         if (sortpath.split(',').indexOf(sortid) != -1) {
             res.json({ msg: "不能移至自身及子集！" });
@@ -197,11 +213,10 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
         return;
     }
 
-    //内容修改：
-    var id = req.body.id;
+    //======内容修改：
     var name = req.body.name;
     var explain = req.body.explain;
-    if (!id || !name) {
+    if (!name) {
         res.json({ msg: "未获得修改项！" });
         return;
     }
@@ -213,51 +228,84 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
         res.json({ msg: "无法操作自身角色！" });
         return;
     }
-    api.roleget({ name: [name] }).then(function (row) {
+    //检查权限
+    role.sql.findOne({
+        where: {
+            name: name
+        },
+        raw: true
+    }).then(function (result) {
         //修改目标是否为用户子集
-        if (req.user.id != 1 && row[0].level.split(',').indexOf(req.user.role) == -1) {
-            res.json({ msg: "非法越权操作！" });
+        if (req.user.id != 1 && result.level.split(',').indexOf(req.user.role) == -1) {
+            return { err: "越权操作目标！" };
         }
         if (explain) {
-            var updata = { name: name, data: { explain: explain } }
-            api.roleedit(updata).then(function (err) {
-                if (!err) {
-                    editRoles(req.body, res, "修改成功");
-                } else {
-                    res.json({ state: false, msg: "修改失败！" });
+            return role.sql.update({ explain: explain }, {
+                where: {
+                    name: name,
                 }
             })
         } else {
             editRoles(req.body, res);
         }
+    }).then(function (result) {
+        if (result && result.err) {
+            res.json({ state: false, msg: result.err });
+        } else {
+            editRoles(req.body, res, "修改成功");
+        }
+    }).catch(function (error) {
+        res.json({ state: false, msg: "修改失败！" });
     })
 
 })
 function setlevel(body, req, res) {
-    api.roleget({ name: [body.sortid] }).then(function (row) {
+    var oldsort, newsort;
+    role.sql.findOne({
+        where: {
+            name: body.sortid
+        },
+        raw: true
+    }).then(function (result) {
         //修改目标 | 迁移目标 是否为用户子集
-        if (req.user.id != 1 && (row[0].level.split(',').indexOf(req.user.role) == -1 || body.sortpath.split(',').indexOf(req.user.role) == -1)) {
-            return "非法越权操作！";
+        if (req.user.id != 1 && (result.level.split(',').indexOf(req.user.role) == -1 || body.sortpath.split(',').indexOf(req.user.role) == -1)) {
+            return { err: "越权操作迁移！" };
         }
-        //迁移目标及其子集
-        return api.rolelevel({ sortid: body.sortid, oldsort: row[0].level, newsort: body.sortpath });
+        oldsort = result.level + body.sortid + ',';
+        newsort = body.sortpath + body.sortid + ',';
+        //迁移目标
+        return role.sql.update({ level: body.sortpath }, {
+            where: {
+                name: body.sortid,
+            }
+        })
 
-    }).then(function (err) {
-        if (!err) {
-            global.rolejson = {}
-            res.json({ state: true, msg: "迁移成功" });
+    }).then(function (result) {
+        if (result && result.err) {
+            res.json({ msg: result.err });
         } else {
-            res.json({ state: true, msg: err });
+            //迁移子集
+            return myData.query('UPDATE role SET level=replace(level,"' + oldsort + '","' + newsort + '") WHERE level LIKE "' + oldsort + '%"');
         }
+    }).then(function (result) {
+
+        global.rolejson = {}
+        res.json({ state: true, msg: "迁移成功" });
+
+    }).catch(function (error) {
+        global.rolejson = {}
+        res.json({ msg: "迁移失败！" });
     })
 
 }
 //角色规则配置
 function editRoles(body, res, msg) {
     return core.awaiter(this, void 0, void 0, function* () {
+        if(body.name == "root"){
+            res.json({ state: true, msg: msg || "超级管理员已是最高权限" });
+            return;
+        }
         var e = yield enforcer;
-
-        body.name == "root" && (body.role = "admin");//限制root角色就是admin权限
 
         // console.log(yield e.getGroupingPolicy());
         const removed = yield e.deleteRolesForUser(body.name.trim());//移除此角色配属

@@ -20,7 +20,7 @@
                 <div class="data_table">
                     <table>
                         <thead>
-                            <tr><th><input class="check-all" type="checkbox"> 名称</th><th>路由</th><th>配置</th><th>创建时间</th></tr>
+                            <tr><th width="20%"><input class="check-all" type="checkbox"> 名称</th><th>路由</th><th>配置</th></tr>
                         </thead>
                         <tbody class="listdata"></tbody>
                     </table>
@@ -48,7 +48,6 @@
             </td>
             <td class="route">{{$value.route}}</td>
             <td><a href="javascript:void(0)" onclick="editbtn(this)">修改</a></td>
-            <td>{{$value.time}}</td>
         </tr>
 		{{/each}}
 	</script>
@@ -58,7 +57,7 @@
     <script>
 
         //获取列表数据
-        var listdata=new getlist("/api/data");
+        var listdata=new getlist("/admin/api/data");
         listdata.init();
         listdata.list();
 
@@ -77,7 +76,7 @@
 
                 $.ajax({
                     type: "delete",
-                    url: "/api/data",
+                    url: "/admin/api/data",
                     data: $('#form1').serialize(),
                     headers: {
                         Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
@@ -109,7 +108,7 @@
                 area: ['60%', '90%'],
                 maxmin: true,
                 shadeClose: true,
-                content: '/api/edit#add'
+                content: '/admin/api/edit#add'
             });
         })
 
@@ -128,7 +127,7 @@
                 maxmin: true,
                 shade: 0,
                 anim: 2,
-                content: '/api/edit#edit'
+                content: '/admin/api/edit#edit'
             });
             //可以执行iframe里的函数
             // var iframe=document.getElementById("layui-layer-iframe"+layerindex)
@@ -142,6 +141,7 @@
         tablehead($('.data_table'))
 
     </script>
+    <%include footer.ejs%>
 </body>
 
 </html>

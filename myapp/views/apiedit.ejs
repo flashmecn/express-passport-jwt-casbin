@@ -36,7 +36,7 @@
                         <ul class="quan justify"></ul>
                         <hr/>
                         <input class="newrole" type="text" maxlength="12" />
-                        <button onclick="newRole()">新增角色</button>
+                        <button onclick="newRole()">新增权限</button>
                     </dd>
                 </dl>
                 <hr>
@@ -72,7 +72,7 @@
         var posturl, msgstr, ajaxtype;
         if (location.hash == "#edit") {
             ajaxtype = "put";
-            posturl = "/api/data";
+            posturl = "/admin/api/data";
             msgstr = "修改成功";
             $('input[name=id]').val(parent.editdata.id);
             $('input[name=api]').val(parent.editdata.route);
@@ -81,7 +81,7 @@
             $('input[name=route]').attr('placeholder', parent.editdata.route);
         } else if (location.hash == "#add") {
             ajaxtype = "post";
-            posturl = "/api/data";
+            posturl = "/admin/api/data";
             msgstr = "添加成功";
         }
 
@@ -119,7 +119,7 @@
 
         $.ajax({
             type: "get",
-            url: "/api/p",
+            url: "/admin/api/p",
             data: {route:parent.editdata.route},
             dataType: 'json',
             headers: {

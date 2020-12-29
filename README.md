@@ -34,8 +34,11 @@ http://localhost:3000/
 Express的基础使用 > ejs后端渲染框架（也可选用其它的） > passport-jwt登录验证 > 访问限制express-rate-limit > sqlite3数据库api > casbin（RBAC角色权限） > sequelize（数据库ORM）
 
 重置网站：
+
 删除数据库 data/flashme-data.db
+
 清空权限文件 data/authz_policy.csv
+
 重新安装 http://localhost:3000/install
 
 权限模块文档：

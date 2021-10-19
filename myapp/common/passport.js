@@ -17,26 +17,14 @@ function startjwt() {
     jwtOptions.secretOrKey = secret;
     var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, done) {
         // usually this would be a database call:
-        user.sql.findOne({
-            where: { id: jwt_payload.id },
-            raw: true,
-            attributes: ['id', 'name', ['password','key'], 'email', 'role', 'level', 'dip', 'dtime']
-        }).then(function (row) {
-            // var user = row.find(user => user.id === jwt_payload.id);
-            // 必须启用状态 & 密码头一致性 & 登陆IP一致性 & 只允许最后登录用户或续签密码
-            row && (row.key = row.key.substr(0,6))
-            if (row && row.level != 0 && jwt_payload.key == row.key && jwt_payload.ip == row.dip && (jwt_payload.iat == row.dtime || jwt_payload.auto == true)) {
-                done(null, row);
-            } else {
-                done(null, false);
-            }
-        })
+        done(null, jwt_payload);
 
     });
     passport.use(strategy);
 
 }
 
+const limit = 7200;//token逾期2小时内可以续期
 
 // JWT 验证
 const jwt = require("jsonwebtoken");
@@ -44,7 +32,7 @@ const jwt = require("jsonwebtoken");
 function createToken(payload, now) {
     let created = now || Math.floor(Date.now() / 1000);
     payload.iat = created;
-    payload.exp = created + 60 * 60 * 2;//token有效期2小时
+    payload.exp = created + 60 * 10;//token有效期10分钟
     return jwt.sign(payload, secret);
 }
 
@@ -79,5 +67,5 @@ function createToken(payload, now) {
 
 
 module.exports = {
-    passport, secret, createToken, startjwt, jwt
+    passport, secret, createToken, startjwt, jwt, limit
 }

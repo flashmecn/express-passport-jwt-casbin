@@ -24,7 +24,7 @@ function startjwt() {
         }).then(function (row) {
             // var user = row.find(user => user.id === jwt_payload.id);
             // 必须启用状态 & 密码头一致性 & 登陆IP一致性 & 只允许最后登录用户或续签密码
-            row.key = row.key.substr(0,6);
+            row && (row.key = row.key.substr(0,6))
             if (row && row.level != 0 && jwt_payload.key == row.key && jwt_payload.ip == row.dip && (jwt_payload.iat == row.dtime || jwt_payload.auto == true)) {
                 done(null, row);
             } else {

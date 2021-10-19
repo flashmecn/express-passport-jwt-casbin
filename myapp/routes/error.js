@@ -23,7 +23,7 @@ router.get('/auth', function (req, res, next) {
                     let payload = pass.jwt.decode(token);
                     //逾期1小时内自动续签token
                     if ((Math.floor(Date.now() / 1000) - payload.exp) < 60 * 60) {
-                        token = pass.createToken({ id: payload.id, auto: true, key: payload.key })
+                        token = pass.createToken({ id: payload.id, auto: true, key: payload.key, ip:payload.ip })
                         res.statusCode = 200;
                         res.setHeader('Content-Type', 'application/json')
                         res.json({ state: true, token: token, msg: '刷新token' })

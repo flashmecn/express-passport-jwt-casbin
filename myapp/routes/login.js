@@ -60,7 +60,7 @@ router.post('/', apiLimiter, function (req, res, next) {
         var miwen = hash.digest('hex')
 
         if (theuser.key === miwen) {
-            payload = { id: theuser.id, key: theuser.key.substr(0,6), ip: req.ip };
+            payload = { id: theuser.id, key: theuser.key.substr(0,6), ip: req.ip, role:theuser.role };
             created = Math.floor(Date.now() / 1000);
             return user.sql.update({ dip: req.ip, dtime: created }, {
                 fields: ['dip','dtime'], //允许更新字段

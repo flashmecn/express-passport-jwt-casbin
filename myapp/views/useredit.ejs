@@ -71,6 +71,7 @@
     </div>
 
 
+    <script src="/js/getlist.js"></script>
     <script>
 
         var frame = parent.layer.getFrameIndex(window.name);//获取此窗体名
@@ -119,7 +120,18 @@
                 error: function (err) {
                     if (err.status == 403) {
                         parent.layer.msg('您无权限操作！');
+                        return;
                     }
+
+                    //针对PUT DELETE无法返回token的操作
+                    getuser(function (result) {
+                        if(result.token){
+                            window.localStorage.setItem('flashmeToken', result.token);
+                            parent.layer.msg("验证通过，请再次操作");
+                        }else{
+                            parent.layer.msg("验证失败！");
+                        }
+                    })
                 }
             });
             return;

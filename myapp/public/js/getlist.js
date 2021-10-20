@@ -114,3 +114,24 @@ var getlist = function (getlisturl) {
     }
 }
 
+function getuser(resolve, reject) {
+    $.ajax({
+        type: 'post',
+        url: "/admin/users",
+        dataType: 'json',
+        headers: {
+            Authorization: "Bearer " + window.localStorage.getItem('flashmeToken')
+        },
+        success: function (result) {
+            if (result) {
+                resolve && resolve(result)
+            } else {
+                reject && reject(result)
+            }
+
+        },
+        error: function (err) {
+            console.log("🚀 ~ err", err)
+        }
+    });
+}

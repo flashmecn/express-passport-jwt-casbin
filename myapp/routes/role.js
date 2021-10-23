@@ -32,7 +32,7 @@ router.get('/edit', function (req, res, next) {
 router.all('*', pass.passport.authenticate('jwt', { session: false, failureRedirect: '/error/auth' }), (req, res, next) => {
     return core.awaiter(this, void 0, void 0, function* () {
 		var e = yield enforcer;
-		yield e.loadPolicy();
+        yield e.loadPolicy();
 		res.locals.username = req.user.role;//获取角色
 		// var token = pass.getToken(req.get('Authorization'));//解析用户token内的信息
 		next();
@@ -46,10 +46,6 @@ router.get('/g', function (req, res, next) {
     return core.awaiter(this, void 0, void 0, function* () {
         var reqrole = req.query.role;
         var e = yield enforcer;
-        // if (global.policystate) {//当权限有变动时重新读取
-        //     yield e.loadPolicy();
-        //     global.policystate = false;
-        // }
         var subject;
         e.getAllSubjects().then(function (row) {
             subject = row;
@@ -246,13 +242,13 @@ router.put('/data', authz.authz({ newEnforcer: enforcer }), function (req, res, 
                 }
             })
         } else {
-            editRoles(req.body, res);
+            return {msg:"角色分配成功"};
         }
     }).then(function (result) {
         if (result && result.err) {
             res.json({ state: false, msg: result.err });
         } else {
-            editRoles(req.body, res, "修改成功");
+            editRoles(req.body, res, result.msg||"修改成功");
         }
     }).catch(function (error) {
         res.json({ state: false, msg: "修改失败！" });
